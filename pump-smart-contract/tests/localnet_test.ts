@@ -33,7 +33,7 @@ describe("dehype", () => {
   
   const connection = provider.connection;
   it("Initilize config account", async () => {
-    owner = loadKeypairFromFile(path.join(__dirname, '../owner.json'));
+    owner = loadKeypairFromFile(path.join(__dirname, '../id.json'));
     console.log('owner', owner.publicKey.toString());
     const keypair = loadKeypairFromFile(path.join(__dirname, '../id.json'));
     console.log('keypair', keypair.publicKey.toString());
