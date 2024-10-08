@@ -11,7 +11,7 @@ pump = "7RiUM3T5TE6VrqKE9ekPfn6SZNQ7Z7FEmQCyoXytdEVD"
 url = "https://devnet.helius-rpc.com/?api-key=39d83ffa-585c-4f90-8636-2f6795db4cb3"
 
 [provider]
-cluster = "Localnet"
+cluster = "devnet"
 wallet = "./id.json"
 
 [scripts]

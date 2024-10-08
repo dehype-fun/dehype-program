@@ -13,7 +13,7 @@ import { Dehype } from './types/dehype';
 import { PROGRAM_ID } from '../cli/programId';
 import * as anchor from "@coral-xyz/anchor";
 
-const provider = anchor.AnchorProvider.local();
+const provider = anchor.AnchorProvider.env();
 
 export type ConfigData = IdlAccounts<Dehype>['configAccount'];
 export type MarketData = IdlAccounts<Dehype>["marketAccount"];
@@ -33,9 +33,9 @@ export class DehypeProgram {
       return this.program.account;
     }
   
-    get configPDA(): PublicKey {
+    public configPDA(owner_key: PublicKey): PublicKey {
       return PublicKey.findProgramAddressSync(
-        [Buffer.from("config")],
+        [Buffer.from("config"), owner_key.toBuffer()],
         this.program.programId
       )[0];
     }
@@ -82,10 +82,13 @@ export class DehypeProgram {
         .initialize(pointMint, tokenMint)
         .accounts({
           owner: owner,
-          configAccount: this.configPDA,
+          configAccount: this.configPDA(owner),
           systemProgram: SystemProgram.programId
         })
         .transaction();
+      const configPDA = this.configPDA(owner);
+      console.log("configPDA", configPDA);
+      console.log("configPDA", configPDA.toString);
       return tx;
     }
 
@@ -94,7 +97,7 @@ export class DehypeProgram {
         .createMarket(marketKey, owner, eventName, answers, creatorFee, serviceFee)
         .accounts({
           owner: owner,
-          configAccount: this.configPDA,
+          configAccount: this.configPDA(owner),
           marketAccount: this.marketPDA(marketKey),
           answerAccount: this.answerPDA(marketKey),
           systemProgram: SystemProgram.programId,
@@ -168,8 +171,9 @@ export class DehypeProgram {
      * Retrieves the configuration data.
      * @returns The configuration data.
      */
-    public async getConfigData(): Promise<ConfigData> {
-      const configPDA = this.configPDA;
+    public async getConfigData(owner: PublicKey): Promise<ConfigData> {
+      const configPDA = this.configPDA(owner);
+      console.log("configPDA", configPDA.toString());
       const configData = await this.accounts.configAccount.fetch(configPDA);
       return configData;
     }
