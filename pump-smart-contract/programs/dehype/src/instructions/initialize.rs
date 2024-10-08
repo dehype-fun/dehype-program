@@ -1,34 +1,36 @@
-use crate::{errors::CustomError, state::*};
 use anchor_lang::prelude::*;
+use std::ops::DerefMut;
 
-pub fn initialize(
-    ctx: Context<InitializeCurveConfiguration>,
-    fees: f64,
-) -> Result<()> {
-    let dex_config = &mut ctx.accounts.dex_configuration_account;
-
-    if fees < 0_f64 || fees > 100_f64 {
-        return err!(CustomError::InvalidFee);
-    }
-
-    dex_config.set_inner(CurveConfiguration::new(fees));
-
-    Ok(())
-}
+use crate::{ errors::ProgramErrorCode, states::{ ConfigAccount, CONFIG_SEED } };
 
 #[derive(Accounts)]
-pub struct InitializeCurveConfiguration<'info> {
-    #[account(
-        init,
-        space = CurveConfiguration::ACCOUNT_SIZE,
-        payer = admin,
-        seeds = [CurveConfiguration::SEED.as_bytes()],
-        bump,
-    )]
-    pub dex_configuration_account: Box<Account<'info, CurveConfiguration>>,
-
+pub struct Initialize<'info> {
     #[account(mut)]
-    pub admin: Signer<'info>,
-    pub rent: Sysvar<'info, Rent>,
+    pub owner: Signer<'info>,
+    #[account(
+        init_if_needed,
+        payer = owner,
+        space = 8 + ConfigAccount::INIT_SPACE,
+        seeds = [&CONFIG_SEED.as_bytes()],
+        bump
+    )]
+    pub config_account: Account<'info, ConfigAccount>,
+
     pub system_program: Program<'info, System>,
+}
+
+pub fn initialize(ctx: Context<Initialize>, point_mint: Pubkey, token_mint: Pubkey) -> Result<()> {
+    let config_account = ctx.accounts.config_account.deref_mut();
+
+    if config_account.is_initialized {
+        return Err(ProgramErrorCode::AlreadyInitialized.into());
+    }
+
+    config_account.bump = ctx.bumps.config_account;
+    config_account.is_initialized = true;
+    config_account.owner = ctx.accounts.owner.key();
+    // config_account.point_mint = point_mint;
+    // config_account.token_mint = token_mint;
+
+    Ok(())
 }
