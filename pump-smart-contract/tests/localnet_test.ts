@@ -28,17 +28,15 @@ describe("dehype", () => {
   const program = anchor.workspace.Dehype as Program<Dehype>;
 
   let owner: Signer;
-  let user: Signer;
 
   const dehypeProgram = new DehypeProgram(DehypeIDL as Dehype, provider.connection);
   
   const connection = provider.connection;
-  before(async () => {
-    const filePath = path.join(__dirname, '../id.json');
-    owner = Keypair.generate();
+  it("Initilize config account", async () => {
+    owner = loadKeypairFromFile(path.join(__dirname, '../owner.json'));
     console.log('owner', owner.publicKey.toString());
-    user = Keypair.generate();
-    const keypair = loadKeypairFromFile(filePath);
+    const keypair = loadKeypairFromFile(path.join(__dirname, '../id.json'));
+    console.log('keypair', keypair.publicKey.toString());
     {
       const amount = 0.1 * LAMPORTS_PER_SOL; // Amount to transfer
       const transaction = new Transaction().add(
@@ -55,8 +53,9 @@ describe("dehype", () => {
     }    const tx = await dehypeProgram.initialize(owner.publicKey);
     const signature = await sendAndConfirmTransaction(connection, tx, [owner]);
 
-    console.log('initialize', signature);
+    console.log('initialize signature', signature);
     const configData = await dehypeProgram.getConfigData(owner.publicKey);
+    console.log('configPDA', dehypeProgram.configPDA(owner.publicKey).toString());
 
     expect(configData.owner.toString()).to.equal(owner.publicKey.toString());
   });

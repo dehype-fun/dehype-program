@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-use super::anwser::AnswerAccount;
+use super::answer::AnswerAccount;
 
 pub const MARKET_SEED: &str = "market";
 

@@ -27,7 +27,7 @@ export type Dehype = {
       "name": "createMarket",
       "accounts": [
         {
-          "name": "owner",
+          "name": "creator",
           "isMut": true,
           "isSigner": true
         },
@@ -56,10 +56,6 @@ export type Dehype = {
         {
           "name": "marketKey",
           "type": "u64"
-        },
-        {
-          "name": "creator",
-          "type": "publicKey"
         },
         {
           "name": "title",
@@ -349,7 +345,7 @@ export const IDL: Dehype = {
       "name": "createMarket",
       "accounts": [
         {
-          "name": "owner",
+          "name": "creator",
           "isMut": true,
           "isSigner": true
         },
@@ -378,10 +374,6 @@ export const IDL: Dehype = {
         {
           "name": "marketKey",
           "type": "u64"
-        },
-        {
-          "name": "creator",
-          "type": "publicKey"
         },
         {
           "name": "title",

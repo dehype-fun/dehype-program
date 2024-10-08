@@ -22,7 +22,6 @@ pub mod dehype {
     pub fn create_market(
         ctx: Context<CreateMarket>,
         market_key: u64,
-        creator: Pubkey,
         title: String,
         description: String,
         answers: Vec<String>,
@@ -32,7 +31,6 @@ pub mod dehype {
         instructions::create_market(
             ctx,
             market_key,
-            creator,
             title,
             description,
             answers,
