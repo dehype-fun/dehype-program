@@ -69,7 +69,7 @@ describe("dehype", () => {
     expect(marketData.serviceFeePercentage.toNumber()).to.equal(serviceFee.toNumber());
     expect(marketData.marketTotalTokens.toNumber()).to.equal(0);
     expect(marketData.coverUrl).to.equal(cover_url);
-    // expect(marketData.isActive).to.be.true;
+    expect(marketData.isActive).to.be.true;
     expect(marketData.description).to.equal(description);
 
     console.log('markets', await program.account.answerAccount.all());
