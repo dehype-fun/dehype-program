@@ -19,7 +19,5 @@ pub struct AnswerAccount {
     #[max_len(10)]
     pub answers: Vec<Answer>,
     pub market_key: u64,
-    pub market_account: Pubkey,
-    pub exist: bool,
 }
 

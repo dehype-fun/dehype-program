@@ -9,7 +9,7 @@ import {
   TOKEN_PROGRAM_ID,
   getAssociatedTokenAddress,
 } from '@solana/spl-token';
-import { Dehype } from './types/dehype';
+import { Dehype } from '../target/types/dehype';
 import { PROGRAM_ID } from '../cli/programId';
 import * as anchor from "@coral-xyz/anchor";
 
@@ -112,5 +112,11 @@ export class DehypeProgram {
     const answerData = await this.accounts.answerAccount.fetch(answerPDA);
     return answerData;
   }
-  
+
+  public async fetchAllMarkets(): Promise<MarketData[]> {
+      return await this.accounts.marketAccount.all();
   }
+  public async fetchAllAnswer(): Promise<AnswerData[]> {
+    return await this.accounts.answerAccount.all();
+  }
+}

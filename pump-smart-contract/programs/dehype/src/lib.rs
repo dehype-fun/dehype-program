@@ -3,11 +3,12 @@ use std::vec::Vec;
 
 pub mod errors;
 pub mod states;
+pub mod utils;
 use crate::instructions::*;
 pub mod instructions;
 use instructions::Initialize;
 
-declare_id!("2VEmmnYYUThb6QWAidWoZe2ePbTQ9UbSKT8miAzaV3kx");
+declare_id!("4F6THBo31VYYfUKwfYCpUERSZccH9KYR9LTw4twyZ6iV");
 
 #[program]
 pub mod dehype {

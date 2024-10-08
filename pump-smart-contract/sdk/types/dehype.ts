@@ -103,14 +103,6 @@ export type Dehype = {
           {
             "name": "marketKey",
             "type": "u64"
-          },
-          {
-            "name": "marketAccount",
-            "type": "publicKey"
-          },
-          {
-            "name": "exist",
-            "type": "bool"
           }
         ]
       }
@@ -181,14 +173,8 @@ export type Dehype = {
             "type": "string"
           },
           {
-            "name": "answersAccount",
-            "type": {
-              "defined": "AnswerAccount"
-            }
-          },
-          {
             "name": "correctAnswerKey",
-            "type": "publicKey"
+            "type": "u64"
           },
           {
             "name": "isActive",
@@ -215,38 +201,6 @@ export type Dehype = {
           {
             "name": "answerTotalTokens",
             "type": "u64"
-          }
-        ]
-      }
-    },
-    {
-      "name": "AnswerAccount",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "bump",
-            "type": "u8"
-          },
-          {
-            "name": "answers",
-            "type": {
-              "vec": {
-                "defined": "Answer"
-              }
-            }
-          },
-          {
-            "name": "marketKey",
-            "type": "u64"
-          },
-          {
-            "name": "marketAccount",
-            "type": "publicKey"
-          },
-          {
-            "name": "exist",
-            "type": "bool"
           }
         ]
       }
@@ -312,6 +266,21 @@ export type Dehype = {
       "code": 6011,
       "name": "AnswerKeyNotRight",
       "msg": "Market/Receive: Answer key is not succeeded answer key"
+    },
+    {
+      "code": 6012,
+      "name": "InvalidBetMint",
+      "msg": "Market/Bet: Invalid bet mint"
+    },
+    {
+      "code": 6013,
+      "name": "InvalidTimeRange",
+      "msg": "Market/ClaimToken: Invalid time range"
+    },
+    {
+      "code": 6014,
+      "name": "Overflow",
+      "msg": "Operation Error: Overflow"
     }
   ]
 };
@@ -421,14 +390,6 @@ export const IDL: Dehype = {
           {
             "name": "marketKey",
             "type": "u64"
-          },
-          {
-            "name": "marketAccount",
-            "type": "publicKey"
-          },
-          {
-            "name": "exist",
-            "type": "bool"
           }
         ]
       }
@@ -499,14 +460,8 @@ export const IDL: Dehype = {
             "type": "string"
           },
           {
-            "name": "answersAccount",
-            "type": {
-              "defined": "AnswerAccount"
-            }
-          },
-          {
             "name": "correctAnswerKey",
-            "type": "publicKey"
+            "type": "u64"
           },
           {
             "name": "isActive",
@@ -533,38 +488,6 @@ export const IDL: Dehype = {
           {
             "name": "answerTotalTokens",
             "type": "u64"
-          }
-        ]
-      }
-    },
-    {
-      "name": "AnswerAccount",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "bump",
-            "type": "u8"
-          },
-          {
-            "name": "answers",
-            "type": {
-              "vec": {
-                "defined": "Answer"
-              }
-            }
-          },
-          {
-            "name": "marketKey",
-            "type": "u64"
-          },
-          {
-            "name": "marketAccount",
-            "type": "publicKey"
-          },
-          {
-            "name": "exist",
-            "type": "bool"
           }
         ]
       }
@@ -630,6 +553,21 @@ export const IDL: Dehype = {
       "code": 6011,
       "name": "AnswerKeyNotRight",
       "msg": "Market/Receive: Answer key is not succeeded answer key"
+    },
+    {
+      "code": 6012,
+      "name": "InvalidBetMint",
+      "msg": "Market/Bet: Invalid bet mint"
+    },
+    {
+      "code": 6013,
+      "name": "InvalidTimeRange",
+      "msg": "Market/ClaimToken: Invalid time range"
+    },
+    {
+      "code": 6014,
+      "name": "Overflow",
+      "msg": "Operation Error: Overflow"
     }
   ]
 };
