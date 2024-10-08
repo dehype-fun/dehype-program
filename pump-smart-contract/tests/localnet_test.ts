@@ -37,41 +37,19 @@ describe("dehype", () => {
   console.log('owner', owner.publicKey.toString());
   const keypair = loadKeypairFromFile(path.join(__dirname, '../id.json'));
   console.log('keypair', keypair.publicKey.toString());
-  // it("Initilize config account", async () => {
-  //   {
-  //     const amount = 0.1 * LAMPORTS_PER_SOL; // Amount to transfer
-  //     const transaction = new Transaction().add(
-  //       SystemProgram.transfer({
-  //         fromPubkey: keypair.publicKey,
-  //         toPubkey: owner.publicKey,
-  //         lamports: amount,
-  //       })
-  //     );
-    
-  //     // Sign and send the transaction
-  //     const signature = await provider.sendAndConfirm(transaction, [keypair]);
-  //     console.log("Transfer signature:", signature);
-  //   }    const tx = await dehypeProgram.initialize(owner.publicKey);
-  //   const signature = await sendAndConfirmTransaction(connection, tx, [owner]);
-
-  //   console.log('initialize signature', signature);
-  //   const configData = await dehypeProgram.getConfigData(owner.publicKey);
-  //   console.log('configPDA', dehypeProgram.configPDA(owner.publicKey).toString());
-
-  //   expect(configData.owner.toString()).to.equal(owner.publicKey.toString());
-  // });
   it("Creates a market", async () => {
     const marketKey = new BN(Math.floor(Math.random() * 10000));
     const answers = ["Option 1", "Option 2"];
     const eventName = 'Test Event';
     const description = 'Test Description';
+    const cover_url = 'https://cdn.pixabay.com/photo/2024/05/26/10/15/bird-8788491_1280.jpg';
     const creatorFee = new BN(3);
     const serviceFee = new BN(2);
 
     console.log('market', dehypeProgram.marketPDA(marketKey).toString());
     console.log('answer', dehypeProgram.answerPDA(marketKey).toString());
 
-    const tx = await dehypeProgram.createMarket(marketKey, owner.publicKey, eventName, description, answers, creatorFee, serviceFee);
+    const tx = await dehypeProgram.createMarket(marketKey, owner.publicKey, eventName, description, cover_url, answers, creatorFee, serviceFee);
     await sendAndConfirmTransaction(connection, tx, [owner]);
 
     const marketData = await dehypeProgram.getMarketData(marketKey);
@@ -79,7 +57,7 @@ describe("dehype", () => {
 
     console.log('marketData', marketData);
     console.log('answerData', answerData);
-    // console.log('all markets', await dehypeProgram.fetchAllMarkets());
+    console.log('all markets', await dehypeProgram.fetchAllMarkets());
     console.log('all answers', await dehypeProgram.fetchAllAnswer());
     // const markets = await dehypeProgram.fetchAllMarkets();
     // console.log('markets', markets);
@@ -90,6 +68,7 @@ describe("dehype", () => {
     expect(marketData.creatorFeePercentage.toNumber()).to.equal(creatorFee.toNumber());
     expect(marketData.serviceFeePercentage.toNumber()).to.equal(serviceFee.toNumber());
     expect(marketData.marketTotalTokens.toNumber()).to.equal(0);
+    expect(marketData.coverUrl).to.equal(cover_url);
     // expect(marketData.isActive).to.be.true;
     expect(marketData.description).to.equal(description);
 

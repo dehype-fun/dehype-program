@@ -73,12 +73,11 @@ export class DehypeProgram {
       return tx;
     }
 
-    public async createMarket(marketKey: BN, creator: PublicKey, eventName: string, description: string, answers: string[], creatorFee: BN, serviceFee: BN): Promise<Transaction> {
+    public async createMarket(marketKey: BN, creator: PublicKey, eventName: string, description: string, cover_url: string, answers: string[], creatorFee: BN, serviceFee: BN): Promise<Transaction> {
       const tx = await this.program.methods
-        .createMarket(marketKey, eventName, description, answers, creatorFee, serviceFee)
+        .createMarket(marketKey, eventName, description, cover_url, answers, creatorFee, serviceFee)
         .accounts({
           creator: creator,
-          configAccount: this.configPDA(creator),
           marketAccount: this.marketPDA(marketKey),
           answerAccount: this.answerPDA(marketKey),
           systemProgram: SystemProgram.programId,
