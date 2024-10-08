@@ -1,9 +1,8 @@
 use anchor_lang::prelude::*;
 use std::vec::Vec;
 
-pub mod state;
-pub mod states;
 pub mod errors;
+pub mod states;
 use crate::instructions::*;
 pub mod instructions;
 use instructions::Initialize;
@@ -13,9 +12,7 @@ declare_id!("2VEmmnYYUThb6QWAidWoZe2ePbTQ9UbSKT8miAzaV3kx");
 #[program]
 pub mod dehype {
     use super::*;
-    pub fn initialize(
-        ctx: Context<Initialize>
-    ) -> Result<()> {
+    pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
         instructions::initialize(ctx)?;
         Ok(())
     }
@@ -26,7 +23,7 @@ pub mod dehype {
         description: String,
         answers: Vec<String>,
         creator_fee_percentage: u64,
-        service_fee_percentage: u64
+        service_fee_percentage: u64,
     ) -> Result<()> {
         instructions::create_market(
             ctx,
@@ -35,7 +32,7 @@ pub mod dehype {
             description,
             answers,
             creator_fee_percentage,
-            service_fee_percentage
+            service_fee_percentage,
         )?;
         Ok(())
     }
