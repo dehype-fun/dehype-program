@@ -318,8 +318,5 @@
       "name": "AnswerKeyNotRight",
       "msg": "Market/Receive: Answer key is not succeeded answer key"
     }
-  ],
-  "metadata": {
-    "address": "2VEmmnYYUThb6QWAidWoZe2ePbTQ9UbSKT8miAzaV3kx"
-  }
+  ]
 }

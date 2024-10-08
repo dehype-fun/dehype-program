@@ -11,7 +11,7 @@ pub struct Initialize<'info> {
         init_if_needed,
         payer = owner,
         space = 8 + ConfigAccount::INIT_SPACE,
-        seeds = [&CONFIG_SEED.as_bytes(), owner.key().as_ref()],
+        seeds = [&CONFIG_SEED.as_bytes()],
         bump
     )]
     pub config_account: Account<'info, ConfigAccount>,
