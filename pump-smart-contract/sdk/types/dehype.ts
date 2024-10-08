@@ -21,16 +21,7 @@ export type Dehype = {
           "isSigner": false
         }
       ],
-      "args": [
-        {
-          "name": "pointMint",
-          "type": "publicKey"
-        },
-        {
-          "name": "tokenMint",
-          "type": "publicKey"
-        }
-      ]
+      "args": []
     },
     {
       "name": "createMarket",
@@ -72,6 +63,10 @@ export type Dehype = {
         },
         {
           "name": "title",
+          "type": "string"
+        },
+        {
+          "name": "description",
           "type": "string"
         },
         {
@@ -162,10 +157,6 @@ export type Dehype = {
             "type": "publicKey"
           },
           {
-            "name": "betMint",
-            "type": "publicKey"
-          },
-          {
             "name": "marketKey",
             "type": "u64"
           },
@@ -184,6 +175,14 @@ export type Dehype = {
           {
             "name": "marketTotalTokens",
             "type": "u64"
+          },
+          {
+            "name": "marketRemainTokens",
+            "type": "u64"
+          },
+          {
+            "name": "description",
+            "type": "string"
           },
           {
             "name": "answersAccount",
@@ -344,16 +343,7 @@ export const IDL: Dehype = {
           "isSigner": false
         }
       ],
-      "args": [
-        {
-          "name": "pointMint",
-          "type": "publicKey"
-        },
-        {
-          "name": "tokenMint",
-          "type": "publicKey"
-        }
-      ]
+      "args": []
     },
     {
       "name": "createMarket",
@@ -395,6 +385,10 @@ export const IDL: Dehype = {
         },
         {
           "name": "title",
+          "type": "string"
+        },
+        {
+          "name": "description",
           "type": "string"
         },
         {
@@ -485,10 +479,6 @@ export const IDL: Dehype = {
             "type": "publicKey"
           },
           {
-            "name": "betMint",
-            "type": "publicKey"
-          },
-          {
             "name": "marketKey",
             "type": "u64"
           },
@@ -507,6 +497,14 @@ export const IDL: Dehype = {
           {
             "name": "marketTotalTokens",
             "type": "u64"
+          },
+          {
+            "name": "marketRemainTokens",
+            "type": "u64"
+          },
+          {
+            "name": "description",
+            "type": "string"
           },
           {
             "name": "answersAccount",

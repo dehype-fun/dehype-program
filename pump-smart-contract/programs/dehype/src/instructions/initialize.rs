@@ -11,7 +11,7 @@ pub struct Initialize<'info> {
         init_if_needed,
         payer = owner,
         space = 8 + ConfigAccount::INIT_SPACE,
-        seeds = [&CONFIG_SEED.as_bytes()],
+        seeds = [&CONFIG_SEED.as_bytes(), owner.key().as_ref()],
         bump
     )]
     pub config_account: Account<'info, ConfigAccount>,
@@ -19,7 +19,7 @@ pub struct Initialize<'info> {
     pub system_program: Program<'info, System>,
 }
 
-pub fn initialize(ctx: Context<Initialize>, point_mint: Pubkey, token_mint: Pubkey) -> Result<()> {
+pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
     let config_account = ctx.accounts.config_account.deref_mut();
 
     if config_account.is_initialized {
@@ -29,8 +29,6 @@ pub fn initialize(ctx: Context<Initialize>, point_mint: Pubkey, token_mint: Pubk
     config_account.bump = ctx.bumps.config_account;
     config_account.is_initialized = true;
     config_account.owner = ctx.accounts.owner.key();
-    // config_account.point_mint = point_mint;
-    // config_account.token_mint = token_mint;
 
     Ok(())
 }

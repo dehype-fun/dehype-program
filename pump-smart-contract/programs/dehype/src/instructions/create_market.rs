@@ -1,7 +1,6 @@
 use std::ops::DerefMut;
 
 use anchor_lang::prelude::*;
-use anchor_spl::token::Mint;
 
 use crate::{
     errors::ProgramErrorCode,
@@ -16,8 +15,6 @@ pub struct CreateMarket<'info> {
         constraint = (owner.key() == config_account.owner) @ ProgramErrorCode::Unauthorized
     )]
     pub owner: Signer<'info>,
-    // #[account(mut)]
-    // pub bet_mint: Account<'info, Mint>,
     #[account(mut)]
     pub config_account: Account<'info, ConfigAccount>,
     #[account(        
@@ -44,26 +41,23 @@ pub fn create_market(
     market_key: u64,
     creator: Pubkey,
     title: String,
+    description: String,
     answers: Vec<String>,
-    // create_fee: u64,
     creator_fee_percentage: u64,
     service_fee_percentage: u64
 ) -> Result<()> {
     let market_account = ctx.accounts.market_account.deref_mut();
 
-    // let clock = Clock::get()?;
-
     market_account.bump = ctx.bumps.market_account;
-    // market_account.bet_mint = ctx.accounts.bet_mint.key();
     market_account.creator = creator;
     market_account.title = title.clone();
-    // market_account.creator_fee = create_fee;
     market_account.creator_fee_percentage = creator_fee_percentage;
     market_account.service_fee_percentage = service_fee_percentage;
-    // market_account.approve_time = clock.unix_timestamp as u64;
     market_account.market_key = market_key;
 
     market_account.market_total_tokens = 0;
+    market_account.market_remain_tokens = 0;
+    market_account.description = description.clone();
     market_account.is_active = true;
 
     let mut new_answers = Vec::new();
@@ -81,17 +75,6 @@ pub fn create_market(
     answer_account.market_account = ctx.accounts.market_account.key();
     answer_account.exist = true;
     answer_account.answers = new_answers;
-
-    // market_account.exist = true;
-
-    // emit!(MarketDrafted {
-    //     creator,
-    //     title,
-    //     create_fee,
-    //     creator_fee_percentage,
-    //     service_fee_percentage,
-    //     approve_time: clock.unix_timestamp as u64,
-    // });
 
     Ok(())
 }
