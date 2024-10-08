@@ -1,28 +1,16 @@
 import * as anchor from "@coral-xyz/anchor";
 import { BN, Program } from "@coral-xyz/anchor";
 import { Dehype } from "../target/types/dehype";
-import { Keypair, PublicKey, Signer, SystemProgram, Connection, sendAndConfirmTransaction, LAMPORTS_PER_SOL, Transaction } from '@solana/web3.js';
+import { Keypair, PublicKey, Signer, SystemProgram, Connection, sendAndConfirmTransaction } from '@solana/web3.js';
 import { assert, expect } from "chai";
 import DehypeIDL from '../sdk/idl/dehype.json';
 import { approve, getAssociatedTokenAddress } from "@solana/spl-token";
 import { DehypeProgram, MarketData } from '../sdk/dehype-program';
 import { createNewMint, createUserWithLamports, mintTokenTo } from "../sdk/utils/helper";
-import * as fs from 'fs';
-import * as path from 'path';
-function loadKeypairFromFile(filePath: string): Keypair {
-  // Read the file content
-  const keypairJson = fs.readFileSync(filePath, 'utf-8');
-  
-  // Parse the JSON content
-  const secretKeyArray = JSON.parse(keypairJson);
-  
-  // Create and return the Keypair instance
-  return Keypair.fromSecretKey(Uint8Array.from(secretKeyArray));
-}
 
 describe("dehype", () => {
   // Configure the client to use the local cluster.
-  const provider = anchor.AnchorProvider.env();
+  const provider = anchor.AnchorProvider.local();
   anchor.setProvider(provider);
 
   const program = anchor.workspace.Dehype as Program<Dehype>;
@@ -36,40 +24,17 @@ describe("dehype", () => {
   const dehypeProgram = new DehypeProgram(DehypeIDL as Dehype, provider.connection);
   
   const connection = provider.connection;
+
   const decimals = 9;
   before(async () => {
-    const filePath = path.join(__dirname, '../id.json');
-
-    // if (fs.existsSync(filePath)) {
-    //   console.log(`The path ${filePath} exists.`);
-    // } else {
-    //   console.log(`The path ${filePath} does not exist.`);
-    // }
-    owner = Keypair.generate();
-    console.log('owner', owner.publicKey.toString());
-    user = Keypair.generate();
-    const keypair = loadKeypairFromFile(filePath);
-    {
-      const amount = 0.1 * LAMPORTS_PER_SOL; // Amount to transfer
-      const transaction = new Transaction().add(
-        SystemProgram.transfer({
-          fromPubkey: keypair.publicKey,
-          toPubkey: owner.publicKey,
-          lamports: amount,
-        })
-      );
-    
-      // Sign and send the transaction
-      const signature = await provider.sendAndConfirm(transaction, [keypair]);
-      console.log("Transfer signature:", signature);
-    }
-    // owner = loadKeypairFromFile("/home/ai/.config/solana/id.json");
+    [owner, user] = await Promise.all([
+      createUserWithLamports(connection, 10),
+      createUserWithLamports(connection, 10),
+    ]);
 
     tokenMint = await createNewMint(connection, owner, decimals);
     pointMint = await createNewMint(connection, owner, decimals);
 
-    console.log('tokenMint', tokenMint.toString());
-    console.log('pointMint', pointMint.toString());
     //mint for owner 3.000.000 points 
     await mintTokenTo(connection, pointMint, owner, owner, owner.publicKey, 3000000 * 10 ** decimals);
 
@@ -84,16 +49,15 @@ describe("dehype", () => {
     const ownerTokenAccount = await getAssociatedTokenAddress(tokenMint, owner.publicKey, true);
 
     //approve to allow config account can transfer point from owner to user  
-    await approve(connection, owner, ownerPointTokenAccount, dehypeProgram.configPDA(owner.publicKey), owner.publicKey, 3000000 * 10 ** decimals, [owner]);
+    await approve(connection, owner, ownerPointTokenAccount, dehypeProgram.configPDA, owner.publicKey, 3000000 * 10 ** decimals, [owner]);
 
     //approve to allow config account can transfer token from owner to user  
-    await approve(connection, owner, ownerTokenAccount, dehypeProgram.configPDA(owner.publicKey), owner.publicKey, 3000000 * 10 ** decimals, [owner]);
+    await approve(connection, owner, ownerTokenAccount, dehypeProgram.configPDA, owner.publicKey, 3000000 * 10 ** decimals, [owner]);
 
     const tx = await dehypeProgram.initialize(owner.publicKey, pointMint, tokenMint);
-    const signature = await sendAndConfirmTransaction(connection, tx, [owner]);
+    await sendAndConfirmTransaction(connection, tx, [owner]);
 
-    console.log('initialize', signature);
-    const configData = await dehypeProgram.getConfigData(owner.publicKey);
+    const configData = await dehypeProgram.getConfigData();
 
     expect(configData.owner.toString()).to.equal(owner.publicKey.toString());
     // expect(configData.tokenMint.toString()).to.equal(tokenMint.toString());
