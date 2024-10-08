@@ -11,8 +11,6 @@ use crate::
 pub struct CreateMarket<'info> {
     #[account(mut)]
     pub creator: Signer<'info>,
-    #[account(mut)]
-    pub config_account: Account<'info, ConfigAccount>,
     #[account(        
         init,
         payer = creator,
@@ -37,6 +35,7 @@ pub fn create_market(
     market_key: u64,
     title: String,
     description: String,
+    cover_url: String,
     answers: Vec<String>,
     creator_fee_percentage: u64,
     service_fee_percentage: u64
@@ -53,6 +52,7 @@ pub fn create_market(
     market_account.market_total_tokens = 0;
     market_account.market_remain_tokens = 0;
     market_account.description = description.clone();
+    market_account.cover_url = cover_url.clone();
     market_account.is_active = true;
 
     let mut new_answers = Vec::new();

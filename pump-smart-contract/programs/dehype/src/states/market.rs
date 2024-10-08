@@ -20,4 +20,6 @@ pub struct MarketAccount {
     pub description: String,
     pub correct_answer_key: u64,
     pub is_active: bool,
+    #[max_len(100)]
+    pub cover_url: String,
 }
