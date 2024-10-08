@@ -27,7 +27,7 @@
       "name": "createMarket",
       "accounts": [
         {
-          "name": "owner",
+          "name": "creator",
           "isMut": true,
           "isSigner": true
         },
@@ -56,10 +56,6 @@
         {
           "name": "marketKey",
           "type": "u64"
-        },
-        {
-          "name": "creator",
-          "type": "publicKey"
         },
         {
           "name": "title",

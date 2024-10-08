@@ -10,16 +10,13 @@ use crate::{
 #[derive(Accounts)]
 #[instruction(market_key: u64)]
 pub struct CreateMarket<'info> {
-    #[account(
-        mut,
-        constraint = (owner.key() == config_account.owner) @ ProgramErrorCode::Unauthorized
-    )]
-    pub owner: Signer<'info>,
+    #[account(mut)]
+    pub creator: Signer<'info>,
     #[account(mut)]
     pub config_account: Account<'info, ConfigAccount>,
     #[account(        
         init,
-        payer = owner,
+        payer = creator,
         space = 8 + AnswerAccount::INIT_SPACE,
         seeds = [ANSWER_SEED.as_bytes(), &market_key.to_le_bytes()],
         bump)
@@ -27,7 +24,7 @@ pub struct CreateMarket<'info> {
     pub answer_account: Account<'info, AnswerAccount>,
     #[account(
         init,
-        payer = owner,
+        payer = creator,
         space = 8 + MarketAccount::INIT_SPACE,
         seeds = [MARKET_SEED.as_bytes(), &market_key.to_le_bytes()],
         bump,
@@ -39,7 +36,6 @@ pub struct CreateMarket<'info> {
 pub fn create_market(
     ctx: Context<CreateMarket>,
     market_key: u64,
-    creator: Pubkey,
     title: String,
     description: String,
     answers: Vec<String>,
@@ -49,7 +45,7 @@ pub fn create_market(
     let market_account = ctx.accounts.market_account.deref_mut();
 
     market_account.bump = ctx.bumps.market_account;
-    market_account.creator = creator;
+    market_account.creator = ctx.accounts.creator.key();
     market_account.title = title.clone();
     market_account.creator_fee_percentage = creator_fee_percentage;
     market_account.service_fee_percentage = service_fee_percentage;

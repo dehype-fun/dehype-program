@@ -70,18 +70,15 @@ export class DehypeProgram {
           systemProgram: SystemProgram.programId
         })
         .transaction();
-      const configPDA = this.configPDA(owner);
-      console.log("configPDA", configPDA);
-      console.log("configPDA", configPDA.toString);
       return tx;
     }
 
-    public async createMarket(marketKey: BN, owner: PublicKey, eventName: string, description: string, answers: string[], creatorFee: BN, serviceFee: BN): Promise<Transaction> {
+    public async createMarket(marketKey: BN, creator: PublicKey, eventName: string, description: string, answers: string[], creatorFee: BN, serviceFee: BN): Promise<Transaction> {
       const tx = await this.program.methods
-        .createMarket(marketKey, owner, eventName, description, answers, creatorFee, serviceFee)
+        .createMarket(marketKey, eventName, description, answers, creatorFee, serviceFee)
         .accounts({
-          owner: owner,
-          configAccount: this.configPDA(owner),
+          creator: creator,
+          configAccount: this.configPDA(creator),
           marketAccount: this.marketPDA(marketKey),
           answerAccount: this.answerPDA(marketKey),
           systemProgram: SystemProgram.programId,
@@ -91,7 +88,6 @@ export class DehypeProgram {
     }
   public async getConfigData(owner: PublicKey): Promise<ConfigData> {
       const configPDA = this.configPDA(owner);
-      console.log("configPDA", configPDA.toString());
       const configData = await this.accounts.configAccount.fetch(configPDA);
       return configData;
     }
