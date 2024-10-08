@@ -1,5 +1,6 @@
 use anchor_lang::prelude::*;
 
+pub const MARKET_SEED: &[u8] = b"market";
 #[account]
 pub struct Market {
     pub event_name: String,
@@ -15,6 +16,7 @@ pub struct OutcomeToken {
 }
 
 #[derive(Clone, Copy, AnchorSerialize, AnchorDeserialize)]
+#[derive(InitSpace)]
 pub enum OutcomeState {
     Pending,
     Winning,
