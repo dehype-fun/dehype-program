@@ -10,7 +10,7 @@ pub struct MarketAccount {
     pub bump: u8,
     pub creator: Pubkey,
     pub market_key: u64,
-    #[max_len(50)]
+    #[max_len(30)]
     pub title: String,
     pub creator_fee_percentage: u64,
     pub service_fee_percentage: u64,
@@ -18,7 +18,6 @@ pub struct MarketAccount {
     pub market_remain_tokens: u64,
     #[max_len(100)]
     pub description: String,
-    pub answers_account: AnswerAccount,
-    pub correct_answer_key: Pubkey,
+    pub correct_answer_key: u64,
     pub is_active: bool,
 }

@@ -2,10 +2,9 @@ use std::ops::DerefMut;
 
 use anchor_lang::prelude::*;
 
-use crate::{
-    errors::ProgramErrorCode,
-    states::{ answer::{Answer, AnswerAccount, ANSWER_SEED}, market::{ MarketAccount, MARKET_SEED }, ConfigAccount },
-};
+use crate::
+    states::{ answer::{Answer, AnswerAccount, ANSWER_SEED}, market::{ MarketAccount, MARKET_SEED }, ConfigAccount }
+;
 
 #[derive(Accounts)]
 #[instruction(market_key: u64)]
@@ -68,9 +67,6 @@ pub fn create_market(
     let answer_account = ctx.accounts.answer_account.deref_mut();
     answer_account.bump = ctx.bumps.answer_account;
     answer_account.market_key = market_key;
-    answer_account.market_account = ctx.accounts.market_account.key();
-    answer_account.exist = true;
     answer_account.answers = new_answers;
-
     Ok(())
 }
