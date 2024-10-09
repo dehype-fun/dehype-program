@@ -1,6 +1,7 @@
 use std::ops::DerefMut;
 
 use anchor_lang::prelude::*;
+use anchor_spl::token::Mint;
 
 use crate::
     states::{ answer::{Answer, AnswerAccount, ANSWER_SEED}, market::{ MarketAccount, MARKET_SEED }, ConfigAccount }
@@ -48,7 +49,6 @@ pub fn create_market(
     market_account.creator_fee_percentage = creator_fee_percentage;
     market_account.service_fee_percentage = service_fee_percentage;
     market_account.market_key = market_key;
-
     market_account.market_total_tokens = 0;
     market_account.market_remain_tokens = 0;
     market_account.description = description.clone();
