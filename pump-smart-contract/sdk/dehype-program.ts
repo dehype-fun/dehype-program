@@ -53,6 +53,13 @@ export class DehypeProgram {
         this.program.programId
       )[0];
     }
+
+    public bettingPDA(voter: PublicKey, marketKey: BN, anwserKey: BN): PublicKey {
+      return PublicKey.findProgramAddressSync(
+        [Buffer.from("betting"), voter.toBuffer(), marketKey.toBuffer("le", 8), anwserKey.toBuffer("le", 8)],
+        this.program.programId
+      )[0];
+    }
   
     /**
      * Initializes the forecast exchange program.
@@ -85,6 +92,27 @@ export class DehypeProgram {
         .transaction();
       return tx;
     }
+     /**
+   * Places a bet on a market.
+   * @param voter - The public key of the voter placing the bet.
+   * @param marketKey - The key of the market to bet on.
+   * @param betAmount - The amount of the bet.
+   * @param answerKey - The key of the answer the bet is placed on.
+   * @returns A transaction object for placing the bet.
+   */
+  public async bet(voter: PublicKey, marketKey: BN, betAmount: BN, answerKey: BN): Promise<Transaction> {
+    const tx = await this.program.methods
+      .bet(answerKey, betAmount)
+      .accounts({
+        voter: voter,
+        marketAccount: this.marketPDA(marketKey),
+        answerAccount: this.answerPDA(marketKey),
+        betAccount: this.bettingPDA(voter, marketKey, answerKey),
+        systemProgram: SystemProgram.programId,
+      })
+      .transaction();
+    return tx;
+  }
   public async getConfigData(owner: PublicKey): Promise<ConfigData> {
       const configPDA = this.configPDA(owner);
       const configData = await this.accounts.configAccount.fetch(configPDA);
@@ -102,6 +130,19 @@ export class DehypeProgram {
   }
 
   /**
+   * Retrieves the betting data for a given voter, market key, and answer key.
+   * @param voter - The public key of the voter.
+   * @param marketKey - The key of the market.
+   * @param anwserKey - The key of the answer.
+   * @returns The betting data as a `BettingData` object.
+   */
+    public async getBettingData(voter: PublicKey, marketKey: BN, anwserKey: BN): Promise<BettingData> {
+      const bettingPDA = this.bettingPDA(voter, marketKey, anwserKey);
+      const bettingData = await this.accounts.bettingAccount.fetch(bettingPDA);
+      return bettingData;
+    }
+
+  /**
    * Retrieves the answer data for a given market key.
    * @param marketKey - The key of the market.
    * @returns The answer data as an `AnswerData` object.
@@ -111,6 +152,21 @@ export class DehypeProgram {
     const answerData = await this.accounts.answerAccount.fetch(answerPDA);
     return answerData;
   }
+
+    /**
+   * Retrieves the balance of the market's vault token account.
+   * @param marketKey - The key of the market.
+   * @returns The balance of the market's vault token account.
+   */
+    public async getMarketVaultBalance(marketKey: BN): Promise<any> {
+      const marketAccount = this.marketPDA(marketKey);
+      const marketData = await this.getMarketData(marketKey);
+  
+      const vaultTokenAccount = await getAssociatedTokenAddress(marketData.betMint, marketAccount, true);
+      const marketVaultBalance = await this.connection.getTokenAccountBalance(vaultTokenAccount, 'confirmed');
+  
+      return marketVaultBalance.value;
+    }
 
   public async fetchAllMarkets(): Promise<MarketData[]> {
       return await this.accounts.marketAccount.all();

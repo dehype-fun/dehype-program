@@ -5,7 +5,7 @@ import { Keypair, PublicKey, Signer, SystemProgram, Connection, sendAndConfirmTr
 import { assert, expect } from "chai";
 import DehypeIDL from '../target/idl/dehype.json';
 import { approve, getAssociatedTokenAddress } from "@solana/spl-token";
-import { DehypeProgram, MarketData } from '../sdk/dehype-program';
+import { DehypeProgram, MarketData, AnswerData } from '../sdk/dehype-program';
 import { createNewMint, createUserWithLamports, mintTokenTo } from "../sdk/utils/helper";
 import * as fs from 'fs';
 import * as path from 'path';
@@ -19,6 +19,7 @@ function loadKeypairFromFile(filePath: string): Keypair {
   // Create and return the Keypair instance
   return Keypair.fromSecretKey(Uint8Array.from(secretKeyArray));
 }
+
 
 describe("dehype", () => {
   // Configure the client to use the local cluster.
@@ -37,6 +38,7 @@ describe("dehype", () => {
   console.log('owner', owner.publicKey.toString());
   const keypair = loadKeypairFromFile(path.join(__dirname, '../id.json'));
   console.log('keypair', keypair.publicKey.toString());
+
   it("Creates a market", async () => {
     const marketKey = new BN(Math.floor(Math.random() * 10000));
     const answers = ["Option 1", "Option 2"];
@@ -55,10 +57,10 @@ describe("dehype", () => {
     const marketData = await dehypeProgram.getMarketData(marketKey);
     const answerData = await dehypeProgram.getAnswerData(marketKey);
 
-    console.log('marketData', marketData);
-    console.log('answerData', answerData);
-    console.log('all markets', await dehypeProgram.fetchAllMarkets());
-    console.log('all answers', await dehypeProgram.fetchAllAnswer());
+    // console.log('marketData', marketData);
+    // console.log('answerData', answerData);
+    // console.log('all markets', await dehypeProgram.fetchAllMarkets());
+    // console.log('all answers', await dehypeProgram.fetchAllAnswer());
     // const markets = await dehypeProgram.fetchAllMarkets();
     // console.log('markets', markets);
     
@@ -85,5 +87,40 @@ describe("dehype", () => {
     // program.account.answerAccount.size
     // expect((await markets).length).to.equal(1);
     
+  });
+  it("Success: Voter 2 Betting", async () => {
+    const marketKey = new BN(Math.floor(Math.random() * 10000));
+    const answers = ["Option 1", "Option 2"];
+    const eventName = 'Test Event';
+    const description = 'Test Description';
+    const cover_url = 'https://cdn.pixabay.com/photo/2024/05/26/10/15/bird-8788491_1280.jpg';
+    const creatorFee = new BN(3);
+    const serviceFee = new BN(2);
+
+    const tx1 = await dehypeProgram.createMarket(marketKey, owner.publicKey, eventName, description, cover_url, answers, creatorFee, serviceFee);
+    await sendAndConfirmTransaction(connection, tx1, [owner]);
+    console.log('marketKey', marketKey.toString());
+    const answerData = await dehypeProgram.getAnswerData(marketKey);
+
+    const decimals = 9;
+    const answerKey = answerData.answers[0].answerKey;
+    const betAmount = new anchor.BN(0.01 * LAMPORTS_PER_SOL);
+
+    const tx = await dehypeProgram
+      .bet(owner.publicKey, marketKey, betAmount, answerKey)
+    const tx2 = await dehypeProgram
+      .bet(owner.publicKey, marketKey, betAmount, answerKey)
+
+    const signature = await sendAndConfirmTransaction(connection, tx, [owner]);
+    const signature2 = await sendAndConfirmTransaction(connection, tx2, [owner]);
+    console.log('signature', signature);
+    console.log('signature2', signature2);
+    const betData = await dehypeProgram.getBettingData(owner.publicKey, marketKey, answerKey);
+    expect(betData.marketKey.toString()).to.equal(marketKey.toString());
+    expect(betData.answerKey.toString()).to.equal(answerKey.toString());
+    expect(betData.voter.toString()).to.equal(owner.publicKey.toString());
+    expect(betData.tokens.toNumber()).to.equal(betAmount.toNumber() * 2);
+    const marketData = await dehypeProgram.getMarketData(marketKey);
+    expect(marketData.marketTotalTokens.toNumber()).to.equal(betAmount.toNumber() * 2);
   });
 });
