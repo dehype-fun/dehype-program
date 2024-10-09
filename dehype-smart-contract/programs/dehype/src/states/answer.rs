@@ -9,6 +9,10 @@ pub struct Answer {
     #[max_len(50)]
     pub name: String,
     pub answer_total_tokens: u64,
+    #[max_len(50)]
+    pub outcome_token_name: String,
+    #[max_len(50)]
+    pub outcome_token_logo: String,
 }
 
 

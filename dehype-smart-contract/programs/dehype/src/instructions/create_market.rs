@@ -1,11 +1,8 @@
 use std::ops::DerefMut;
 
 use anchor_lang::{prelude::*, system_program};
-use anchor_spl::token::Mint;
-use solana_program::{program::invoke_signed, system_instruction};
 
-use crate::
-    states::{ answer::{Answer, AnswerAccount, ANSWER_SEED}, market::{ MarketAccount, MARKET_SEED, MARKET_VAULT_SEED }, ConfigAccount }
+use crate::{consts::{DEFAULT_OUTCOME_TOKEN_LOGO, DEFAULT_OUTCOME_TOKEN_NAME}, errors::ProgramErrorCode, states::{ answer::{Answer, AnswerAccount, ANSWER_SEED}, market::{ MarketAccount, MARKET_SEED, MARKET_VAULT_SEED } }}
 ;
 
 #[derive(Accounts)]
@@ -48,19 +45,26 @@ pub fn create_market(
     description: String,
     cover_url: String,
     answers: Vec<String>,
+    outcome_token_names: Option<Vec<String>>,
+    outcome_token_logos: Option<Vec<String>>,
     creator_fee_percentage: u64,
-    service_fee_percentage: u64
 ) -> Result<()> {
+    if creator_fee_percentage > 10 {
+        return Err(ProgramErrorCode::CreatorFeeTooHigh.into());
+    }
+    if let (Some(names), Some(logos)) = (&outcome_token_names, &outcome_token_logos) {
+        if answers.len() != names.len() || answers.len() != logos.len() {
+            return Err(ProgramErrorCode::InvalidArguments.into());
+        }
+    }
     let market_account = ctx.accounts.market_account.deref_mut();
     market_account.bump = ctx.bumps.market_account;
     market_account.bump_vault = ctx.bumps.vault_account;
     market_account.creator = ctx.accounts.creator.key();
     market_account.title = title.clone();
     market_account.creator_fee_percentage = creator_fee_percentage;
-    market_account.service_fee_percentage = service_fee_percentage;
     market_account.market_key = market_key;
     market_account.market_total_tokens = 0;
-    market_account.market_remain_tokens = 0;
     market_account.description = description.clone();
     market_account.cover_url = cover_url.clone();
     market_account.is_active = true;
@@ -71,8 +75,11 @@ pub fn create_market(
             answer_key: i as u64,
             name: answer.clone(),
             answer_total_tokens: 0,
+            outcome_token_name: outcome_token_names.as_ref().map_or(DEFAULT_OUTCOME_TOKEN_NAME.to_string(), |names| names[i].clone()),
+            outcome_token_logo: outcome_token_logos.as_ref().map_or(DEFAULT_OUTCOME_TOKEN_LOGO.to_string(), |logos| logos[i].clone()),
         });
     }
+
 
     let answer_account = ctx.accounts.answer_account.deref_mut();
     answer_account.bump = ctx.bumps.answer_account;

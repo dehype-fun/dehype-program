@@ -42,16 +42,17 @@ describe("dehype", () => {
   it("Creates a market", async () => {
     const marketKey = new BN(Math.floor(Math.random() * 10000));
     const answers = ["Option 1", "Option 2"];
+    const outcomeTokenNames = ["Token 1", "Token 2"];
+    const outcomeTokenLogos = ['https://letsenhance.io/static/8f5e523ee6b2479e26ecc91b9c25261e/1015f/MainAfter.jpg', 'https://img-cdn.pixlr.com/image-generator/history/65bb506dcb310754719cf81f/ede935de-1138-4f66-8ed7-44bd16efc709/medium.webp']
     const eventName = 'Test Event';
     const description = 'Test Description';
     const cover_url = 'https://cdn.pixabay.com/photo/2024/05/26/10/15/bird-8788491_1280.jpg';
     const creatorFee = new BN(3);
-    const serviceFee = new BN(2);
 
     // console.log('market', dehypeProgram.marketPDA(marketKey).toString());
     // console.log('answer', dehypeProgram.answerPDA(marketKey).toString());
 
-    const tx = await dehypeProgram.createMarket(marketKey, owner.publicKey, eventName, description, cover_url, answers, creatorFee, serviceFee);
+    const tx = await dehypeProgram.createMarket(marketKey, owner.publicKey, eventName, description, cover_url, answers, creatorFee, outcomeTokenNames, outcomeTokenLogos);
     await sendAndConfirmTransaction(connection, tx, [owner]);
 
     const marketData = await dehypeProgram.getMarketData(marketKey);
@@ -69,7 +70,6 @@ describe("dehype", () => {
     expect(marketData.creator.toString()).to.equal(owner.publicKey.toString());
     expect(marketData.title).to.equal(eventName);
     expect(marketData.creatorFeePercentage.toNumber()).to.equal(creatorFee.toNumber());
-    expect(marketData.serviceFeePercentage.toNumber()).to.equal(serviceFee.toNumber());
     expect(marketData.marketTotalTokens.toNumber()).to.equal(0);
     expect(marketData.coverUrl).to.equal(cover_url);
     expect(marketData.isActive).to.be.true;
@@ -83,6 +83,9 @@ describe("dehype", () => {
     for (let i = 0; i < answers.length; i++) {
         expect(answerData.answers[i].name).to.equal(answers[i]);
         expect(answerData.answers[i].answerTotalTokens.toNumber()).to.equal(0);
+        expect(answerData.answers[i].outcomeTokenName).to.equal(outcomeTokenNames[i]);
+        expect(answerData.answers[i].outcomeTokenLogo).to.equal(outcomeTokenLogos[i]);
+
     }
     
   });
@@ -92,12 +95,13 @@ describe("dehype", () => {
     const eventName = 'Test Event';
     const description = 'Test Description';
     const cover_url = 'https://cdn.pixabay.com/photo/2024/05/26/10/15/bird-8788491_1280.jpg';
+    const outcomeTokenNames = ["Token 1", "Token 2"];
+    const outcomeTokenLogos = ['https://letsenhance.io/static/8f5e523ee6b2479e26ecc91b9c25261e/1015f/MainAfter.jpg', 'https://img-cdn.pixlr.com/image-generator/history/65bb506dcb310754719cf81f/ede935de-1138-4f66-8ed7-44bd16efc709/medium.webp']
     const creatorFee = new BN(3);
-    const serviceFee = new BN(2);
     console.log('vaultPDA', dehypeProgram.vaultPDA(marketKey).toString());
     console.log('marketPDA', dehypeProgram.marketPDA(marketKey).toString());
     console.log('answerPDA', dehypeProgram.answerPDA(marketKey).toString());
-    const tx1 = await dehypeProgram.createMarket(marketKey, owner.publicKey, eventName, description, cover_url, answers, creatorFee, serviceFee);
+    const tx1 = await dehypeProgram.createMarket(marketKey, owner.publicKey, eventName, description, cover_url, answers, creatorFee);
     await sendAndConfirmTransaction(connection, tx1, [owner]);
     console.log('marketKey', marketKey.toString());
     const answerData = await dehypeProgram.getAnswerData(marketKey);
