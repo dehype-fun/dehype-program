@@ -1,7 +1,3 @@
-Here's a structure for updating the README for your DeHype smart contract:
-
----
-
 # DeHype Smart Contract
 
 DeHype is a decentralized prediction marketplace platform built on the Solana blockchain, allowing users to create, participate in, and resolve prediction markets. This repository contains the smart contracts and instructions for the DeHype platform.
