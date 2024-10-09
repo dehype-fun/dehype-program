@@ -1,4 +1,4 @@
-use std::ops::DerefMut;
+use std::{borrow::BorrowMut, ops::DerefMut};
 
 use anchor_lang::prelude::*;
 use anchor_spl::{
@@ -7,7 +7,7 @@ use anchor_spl::{
 };
 use solana_program::{program::invoke, system_instruction};
 
-use crate::{errors::ProgramErrorCode, states::{answer::AnswerAccount, betting::{BettingAccount, BETTING_SEED}, market::MarketAccount, ConfigAccount}, utils::helper::{transfer_sol, transfer_token_or_point_to_pool}};
+use crate::{errors::ProgramErrorCode, states::{answer::AnswerAccount, betting::{BettingAccount, BETTING_SEED}, market::{MarketAccount, MARKET_VAULT_SEED}, ConfigAccount}, utils::helper::{transfer_sol, transfer_token_or_point_to_pool}};
 
 #[derive(Accounts)]
 #[instruction(answer_key: u64)]
@@ -26,7 +26,8 @@ pub struct Bet<'info> {
       bump,
     )]
     pub bet_account: Account<'info, BettingAccount>,
-
+    #[account(mut)]
+    pub vault_account: AccountInfo<'info>,
     pub system_program: Program<'info, System>,
 }
 
@@ -36,19 +37,22 @@ pub fn bet(ctx: Context<Bet>, answer_key: u64, amount: u64) -> Result<()> {
     // let market_account = ctx.accounts.market_account.deref_mut();
     let answer_account = ctx.accounts.answer_account.deref_mut();
 
+    if (**ctx.accounts.voter.to_account_info().lamports.borrow()) < amount {
+        return Err(ProgramErrorCode::InsufficientBalance.into());
+    }
     // Send SOL to the pool
     // transfer_sol(ctx.accounts.voter.to_account_info(), ctx.accounts.market_account.to_account_info(), amount);
     invoke(
         &system_instruction::transfer(
             &ctx.accounts.voter.key(),
-            &ctx.accounts.market_account.key(),
+            &ctx.accounts.vault_account.key(),
             amount,
         ),
         &[
             ctx.accounts.voter.to_account_info(),
-            ctx.accounts.market_account.to_account_info(),
+            ctx.accounts.vault_account.to_account_info(),
             ctx.accounts.system_program.to_account_info(),
-        ],
+        ]
     )?;
     //     amount,
     // )?;
@@ -81,6 +85,6 @@ pub fn bet(ctx: Context<Bet>, answer_key: u64, amount: u64) -> Result<()> {
     betting_account.exist = true;
 
     ctx.accounts.market_account.market_total_tokens += amount;
-
+    // ctx.accounts.market_account.bump_vault = *ctx.bumps.vault_account.borrow_mut();
     Ok(())
 }

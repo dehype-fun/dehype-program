@@ -26,4 +26,6 @@ pub enum ProgramErrorCode {
     CannotClaimToken,
     #[msg("Market/Receive: Answer key is not succeeded answer key")]
     AnswerKeyNotRight,
+    #[msg("Market/Receive: Insufficient balance")]
+    InsufficientBalance,
 }

@@ -44,4 +44,8 @@ pub mod dehype {
         instructions::bet(ctx, anwser_key, amount)?;
         Ok(())
     }
+    pub fn retrive(ctx: Context<Retrieve>, anwser_key: u64, amount: u64) -> Result<()> {
+        instructions::retrive(ctx, anwser_key, amount)?;
+        Ok(())
+    }
 }

@@ -60,6 +60,13 @@ export class DehypeProgram {
         this.program.programId
       )[0];
     }
+
+    public vaultPDA(marketKey: BN): PublicKey {
+      return PublicKey.findProgramAddressSync(
+        [Buffer.from("market_vault"), marketKey.toBuffer("le", 8)],
+        this.program.programId
+      )[0];
+    }
   
     /**
      * Initializes the forecast exchange program.
@@ -86,6 +93,7 @@ export class DehypeProgram {
         .accounts({
           creator: creator,
           marketAccount: this.marketPDA(marketKey),
+          vaultAccount: this.vaultPDA(marketKey),
           answerAccount: this.answerPDA(marketKey),
           systemProgram: SystemProgram.programId,
         })
@@ -106,7 +114,22 @@ export class DehypeProgram {
       .accounts({
         voter: voter,
         marketAccount: this.marketPDA(marketKey),
+        vaultAccount: this.vaultPDA(marketKey),
         answerAccount: this.answerPDA(marketKey),
+        betAccount: this.bettingPDA(voter, marketKey, answerKey),
+        systemProgram: SystemProgram.programId,
+      })
+      .transaction();
+    return tx;
+  }
+  public async retrive(voter: PublicKey, marketKey: BN, betAmount: BN, answerKey: BN): Promise<Transaction> {
+    const tx = await this.program.methods
+      .retrive(answerKey, betAmount)
+      .accounts({
+        voter: voter,
+        marketAccount: this.marketPDA(marketKey),
+        answerAccount: this.answerPDA(marketKey),
+        vaultAccount: this.vaultPDA(marketKey),
         betAccount: this.bettingPDA(voter, marketKey, answerKey),
         systemProgram: SystemProgram.programId,
       })
@@ -152,21 +175,6 @@ export class DehypeProgram {
     const answerData = await this.accounts.answerAccount.fetch(answerPDA);
     return answerData;
   }
-
-    /**
-   * Retrieves the balance of the market's vault token account.
-   * @param marketKey - The key of the market.
-   * @returns The balance of the market's vault token account.
-   */
-    public async getMarketVaultBalance(marketKey: BN): Promise<any> {
-      const marketAccount = this.marketPDA(marketKey);
-      const marketData = await this.getMarketData(marketKey);
-  
-      const vaultTokenAccount = await getAssociatedTokenAddress(marketData.betMint, marketAccount, true);
-      const marketVaultBalance = await this.connection.getTokenAccountBalance(vaultTokenAccount, 'confirmed');
-  
-      return marketVaultBalance.value;
-    }
 
   public async fetchAllMarkets(): Promise<MarketData[]> {
       return await this.accounts.marketAccount.all();
