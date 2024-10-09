@@ -26,6 +26,10 @@ pub enum ProgramErrorCode {
     CannotClaimToken,
     #[msg("Market/Receive: Answer key is not succeeded answer key")]
     AnswerKeyNotRight,
-    #[msg("Market/Receive: Insufficient balance")]
+    #[msg("Market/Retrive: Insufficient balance")]
     InsufficientBalance,
+    #[msg("Market/Create: Creator fee is too high")]
+    CreatorFeeTooHigh,
+    #[msg("Invalid arguments")]
+    InvalidArguments,
 }

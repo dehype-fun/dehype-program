@@ -3,6 +3,7 @@ pub mod initialize;
 pub mod create_market;
 pub mod bet;
 pub mod retrieve;
+pub mod resolve_market;
 // pub mod remove_liquidity;
 // pub mod swap;
 // pub mod buy_point;

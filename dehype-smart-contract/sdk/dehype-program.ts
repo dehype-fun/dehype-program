@@ -18,6 +18,7 @@ const provider = anchor.AnchorProvider.env();
 export type ConfigData = IdlAccounts<Dehype>['configAccount'];
 export type MarketData = IdlAccounts<Dehype>["marketAccount"];
 export type AnswerData = IdlAccounts<Dehype>["answerAccount"];
+export type BettingData = IdlAccounts<Dehype>["bettingAccount"];
 
 export class DehypeProgram {
     constructor(
@@ -87,9 +88,9 @@ export class DehypeProgram {
       return tx;
     }
 
-    public async createMarket(marketKey: BN, creator: PublicKey, eventName: string, description: string, cover_url: string, answers: string[], creatorFee: BN, serviceFee: BN): Promise<Transaction> {
+    public async createMarket(marketKey: BN, creator: PublicKey, eventName: string, description: string, cover_url: string, answers: string[], creatorFee: BN, outcomeTokenNames?: string[], outcomeTokenLogos?: string[]): Promise<Transaction> {
       const tx = await this.program.methods
-        .createMarket(marketKey, eventName, description, cover_url, answers, creatorFee, serviceFee)
+        .createMarket(marketKey, eventName, description, cover_url, answers, outcomeTokenNames || null, outcomeTokenLogos || null, creatorFee)
         .accounts({
           creator: creator,
           marketAccount: this.marketPDA(marketKey),

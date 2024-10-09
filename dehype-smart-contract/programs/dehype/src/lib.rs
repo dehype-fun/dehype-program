@@ -4,6 +4,7 @@ use std::vec::Vec;
 pub mod errors;
 pub mod states;
 pub mod utils;
+pub mod consts;
 use crate::instructions::*;
 pub mod instructions;
 use instructions::Initialize;
@@ -24,7 +25,8 @@ pub mod dehype {
         description: String,
         cover_url: String,
         answers: Vec<String>,
-        creator_fee_percentage: u64,
+        outcome_token_names: Option<Vec<String>>,
+        outcome_token_logos: Option<Vec<String>>,
         service_fee_percentage: u64,
     ) -> Result<()> {
         instructions::create_market(
@@ -34,7 +36,8 @@ pub mod dehype {
             description,
             cover_url,
             answers,
-            creator_fee_percentage,
+            outcome_token_names,
+            outcome_token_logos,
             service_fee_percentage,
         )?;
         Ok(())
