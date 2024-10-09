@@ -1,6 +1,6 @@
 use std::ops::DerefMut;
 
-use anchor_lang::prelude::*;
+use anchor_lang::{prelude::*, system_program};
 use anchor_spl::token::Mint;
 use solana_program::{program::invoke_signed, system_instruction};
 
@@ -34,6 +34,7 @@ pub struct CreateMarket<'info> {
         payer = creator,
         space = 0, // System account with no data
         seeds = [MARKET_VAULT_SEED, &market_key.to_le_bytes()],
+        owner = system_program::System::id(),
         bump,
     )]
     pub vault_account: AccountInfo<'info>,
@@ -51,7 +52,6 @@ pub fn create_market(
     service_fee_percentage: u64
 ) -> Result<()> {
     let market_account = ctx.accounts.market_account.deref_mut();
-
     market_account.bump = ctx.bumps.market_account;
     market_account.bump_vault = ctx.bumps.vault_account;
     market_account.creator = ctx.accounts.creator.key();
@@ -78,26 +78,5 @@ pub fn create_market(
     answer_account.bump = ctx.bumps.answer_account;
     answer_account.market_key = market_key;
     answer_account.answers = new_answers;
-
-    // let seeds: &[&[u8]] = &[
-    //     MARKET_VAULT_SEED.as_bytes(),
-    //     &market_account.market_key.to_le_bytes(),
-    //     &[market_account.bump_vault],
-    // ];
-
-    // // Send SOL to the pool
-    // invoke_signed(
-    //     &system_instruction::transfer(
-    //         &ctx.accounts.vault_account.key(),
-    //         &ctx.accounts.creator.key(),
-    //         10,
-    //     ),
-    //     &[
-    //         ctx.accounts.vault_account.to_account_info(),
-    //         ctx.accounts.creator.to_account_info(),
-    //         ctx.accounts.system_program.to_account_info(),
-    //     ],
-    //     &[&seeds]
-    // )?;
     Ok(())
 }

@@ -3,9 +3,9 @@ use std::ops::DerefMut;
 use anchor_lang::{prelude::*, system_program};
 use anchor_spl::{
     associated_token::AssociatedToken,
-    token::{self, Mint, Token, TokenAccount},
+    token::{self, accessor::amount, Mint, Token, TokenAccount},
 };
-use solana_program::{program::{invoke, invoke_signed}, system_instruction};
+use solana_program::{fee_calculator::DEFAULT_TARGET_LAMPORTS_PER_SIGNATURE, program::{invoke, invoke_signed}, system_instruction};
 
 use crate::{errors::ProgramErrorCode, states::{answer::AnswerAccount, betting::{BettingAccount, BETTING_SEED}, market::{MarketAccount, MARKET_SEED, MARKET_VAULT_SEED}, ConfigAccount}, utils::helper::{transfer_sol, transfer_token_or_point_to_pool}};
 
@@ -26,7 +26,11 @@ pub struct Retrieve<'info> {
       bump,
     )]
     pub bet_account: Account<'info, BettingAccount>,
-    #[account(mut)]
+    #[account(
+        mut,
+        seeds = [MARKET_VAULT_SEED, &market_account.market_key.to_le_bytes()],
+        bump = market_account.bump_vault,
+    )]
     pub vault_account: AccountInfo<'info>,
     pub system_program: Program<'info, System>,
 }
@@ -37,23 +41,12 @@ pub fn retrive(ctx: Context<Retrieve>, answer_key: u64, amount: u64) -> Result<(
     let market_account = ctx.accounts.market_account.deref_mut();
     let answer_account = ctx.accounts.answer_account.deref_mut();
 
-    if betting_account.tokens < amount {
+    const LAMPORTS_PER_SIGNATURE: u64 = 5000;
+    let total_amount: u64 =  amount + LAMPORTS_PER_SIGNATURE;
+    if betting_account.tokens < total_amount {
         return Err(ProgramErrorCode::InsufficientBalance.into());
     }
-    
-    // let ix = anchor_lang::solana_program::system_instruction::transfer(
-    //     &ctx.accounts.market_account.key(),
-    //     &ctx.accounts.voter.key(),
-    //     amount,
-    // );
-    // anchor_lang::solana_program::program::invoke(
-    //     &ix,
-    //     &[
-    //         ctx.accounts.market_account.to_account_info(),
-    //         ctx.accounts.voter.to_account_info(),
-    //         ctx.accounts.system_program.to_account_info(),
-    //     ],
-    // );
+
     let seeds: &[&[u8]] = &[
         MARKET_VAULT_SEED,
         &market_account.market_key.to_le_bytes(),
@@ -61,28 +54,15 @@ pub fn retrive(ctx: Context<Retrieve>, answer_key: u64, amount: u64) -> Result<(
     ];
     let signer_seeds = &[&seeds[..]];
 
-    // Send SOL to the pool
-    // invoke_signed(
-    //     &system_instruction::transfer(
-    //         &ctx.accounts.vault_account.key(),
-    //         &ctx.accounts.voter.key(),
-    //         amount,
-    //     ),
-    //     &[
-    //         ctx.accounts.vault_account.to_account_info(),
-    //         ctx.accounts.voter.to_account_info(),
-    //         ctx.accounts.system_program.to_account_info(),
-    //     ],
-    //     &[&seeds]
-    // )?;
-     let cpi_context = CpiContext::new(
-            ctx.accounts.system_program.to_account_info(),
-            system_program::Transfer {
-                from: ctx.accounts.vault_account.to_account_info().clone(),
-                to: ctx.accounts.voter.to_account_info().clone(),
-            },
-        );
-    system_program::transfer(cpi_context, amount)?;
+    let cpi_context = CpiContext::new_with_signer(
+        ctx.accounts.system_program.to_account_info(),
+        system_program::Transfer {
+            from: ctx.accounts.vault_account.to_account_info().clone(),
+            to: ctx.accounts.voter.to_account_info().clone(),
+        },
+        signer_seeds,
+    );
+    system_program::transfer(cpi_context, total_amount)?;
 
     if !answer_account
         .answers
@@ -95,7 +75,7 @@ pub fn retrive(ctx: Context<Retrieve>, answer_key: u64, amount: u64) -> Result<(
     // Update the specific answer's total tokens
     for answer in answer_account.answers.iter_mut() {
         if answer.answer_key == answer_key {
-            answer.answer_total_tokens += amount;
+            answer.answer_total_tokens -= total_amount;
             break;
         }
     }
@@ -106,11 +86,11 @@ pub fn retrive(ctx: Context<Retrieve>, answer_key: u64, amount: u64) -> Result<(
     betting_account.market_key = market_key;
     betting_account.answer_key = answer_key;
     betting_account.voter = ctx.accounts.voter.key();
-    betting_account.tokens += amount;
+    betting_account.tokens -= total_amount;
     betting_account.create_time = clock.unix_timestamp as u64;
     betting_account.exist = true;
 
-    ctx.accounts.market_account.market_total_tokens += amount;
+    ctx.accounts.market_account.market_total_tokens -= total_amount;
 
     Ok(())
 }
