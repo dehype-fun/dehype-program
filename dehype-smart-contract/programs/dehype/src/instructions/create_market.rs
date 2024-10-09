@@ -2,9 +2,10 @@ use std::ops::DerefMut;
 
 use anchor_lang::prelude::*;
 use anchor_spl::token::Mint;
+use solana_program::{program::invoke_signed, system_instruction};
 
 use crate::
-    states::{ answer::{Answer, AnswerAccount, ANSWER_SEED}, market::{ MarketAccount, MARKET_SEED }, ConfigAccount }
+    states::{ answer::{Answer, AnswerAccount, ANSWER_SEED}, market::{ MarketAccount, MARKET_SEED, MARKET_VAULT_SEED }, ConfigAccount }
 ;
 
 #[derive(Accounts)]
@@ -28,6 +29,14 @@ pub struct CreateMarket<'info> {
         bump,
     )]
     pub market_account: Account<'info, MarketAccount>,
+    #[account(
+        init,
+        payer = creator,
+        space = 0, // System account with no data
+        seeds = [MARKET_VAULT_SEED, &market_key.to_le_bytes()],
+        bump,
+    )]
+    pub vault_account: AccountInfo<'info>,
     pub system_program: Program<'info, System>,
 }
 
@@ -44,6 +53,7 @@ pub fn create_market(
     let market_account = ctx.accounts.market_account.deref_mut();
 
     market_account.bump = ctx.bumps.market_account;
+    market_account.bump_vault = ctx.bumps.vault_account;
     market_account.creator = ctx.accounts.creator.key();
     market_account.title = title.clone();
     market_account.creator_fee_percentage = creator_fee_percentage;
@@ -68,5 +78,26 @@ pub fn create_market(
     answer_account.bump = ctx.bumps.answer_account;
     answer_account.market_key = market_key;
     answer_account.answers = new_answers;
+
+    // let seeds: &[&[u8]] = &[
+    //     MARKET_VAULT_SEED.as_bytes(),
+    //     &market_account.market_key.to_le_bytes(),
+    //     &[market_account.bump_vault],
+    // ];
+
+    // // Send SOL to the pool
+    // invoke_signed(
+    //     &system_instruction::transfer(
+    //         &ctx.accounts.vault_account.key(),
+    //         &ctx.accounts.creator.key(),
+    //         10,
+    //     ),
+    //     &[
+    //         ctx.accounts.vault_account.to_account_info(),
+    //         ctx.accounts.creator.to_account_info(),
+    //         ctx.accounts.system_program.to_account_info(),
+    //     ],
+    //     &[&seeds]
+    // )?;
     Ok(())
 }

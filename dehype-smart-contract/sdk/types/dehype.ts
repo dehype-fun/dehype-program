@@ -42,6 +42,11 @@ export type Dehype = {
           "isSigner": false
         },
         {
+          "name": "vaultAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
           "name": "systemProgram",
           "isMut": false,
           "isSigner": false
@@ -100,6 +105,56 @@ export type Dehype = {
         },
         {
           "name": "betAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "anwserKey",
+          "type": "u64"
+        },
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "retrive",
+      "accounts": [
+        {
+          "name": "voter",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "marketAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "answerAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "betAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultAccount",
           "isMut": true,
           "isSigner": false
         },
@@ -213,6 +268,10 @@ export type Dehype = {
         "fields": [
           {
             "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "bumpVault",
             "type": "u8"
           },
           {
@@ -345,6 +404,11 @@ export type Dehype = {
       "code": 6011,
       "name": "AnswerKeyNotRight",
       "msg": "Market/Receive: Answer key is not succeeded answer key"
+    },
+    {
+      "code": 6012,
+      "name": "InsufficientBalance",
+      "msg": "Market/Receive: Insufficient balance"
     }
   ]
 };
@@ -393,6 +457,11 @@ export const IDL: Dehype = {
           "isSigner": false
         },
         {
+          "name": "vaultAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
           "name": "systemProgram",
           "isMut": false,
           "isSigner": false
@@ -451,6 +520,56 @@ export const IDL: Dehype = {
         },
         {
           "name": "betAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "anwserKey",
+          "type": "u64"
+        },
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "retrive",
+      "accounts": [
+        {
+          "name": "voter",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "marketAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "answerAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "betAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vaultAccount",
           "isMut": true,
           "isSigner": false
         },
@@ -564,6 +683,10 @@ export const IDL: Dehype = {
         "fields": [
           {
             "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "bumpVault",
             "type": "u8"
           },
           {
@@ -696,6 +819,11 @@ export const IDL: Dehype = {
       "code": 6011,
       "name": "AnswerKeyNotRight",
       "msg": "Market/Receive: Answer key is not succeeded answer key"
+    },
+    {
+      "code": 6012,
+      "name": "InsufficientBalance",
+      "msg": "Market/Receive: Insufficient balance"
     }
   ]
 };
