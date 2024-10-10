@@ -1,3 +1,4 @@
+
 use std::ops::DerefMut;
 
 use anchor_lang::{prelude::*, system_program};
@@ -5,8 +6,6 @@ use anchor_spl::{
     associated_token::AssociatedToken,
     token::{self, accessor::amount, Mint, Token, TokenAccount},
 };
-use solana_program::{fee_calculator::DEFAULT_TARGET_LAMPORTS_PER_SIGNATURE, program::{invoke, invoke_signed}, system_instruction};
-
 use crate::{errors::ProgramErrorCode, states::{answer::AnswerAccount, betting::{BettingAccount, BETTING_SEED}, market::{MarketAccount, MARKET_SEED, MARKET_VAULT_SEED}, ConfigAccount}, utils::helper::{transfer_sol, transfer_token_or_point_to_pool}};
 
 #[derive(Accounts)]
@@ -31,6 +30,7 @@ pub struct Retrieve<'info> {
         seeds = [MARKET_VAULT_SEED, &market_account.market_key.to_le_bytes()],
         bump = market_account.bump_vault,
     )]
+    /// CHECK: This is not dangerous because we don't read or write from this account
     pub vault_account: AccountInfo<'info>,
     pub system_program: Program<'info, System>,
 }

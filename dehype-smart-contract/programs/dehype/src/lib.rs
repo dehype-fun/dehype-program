@@ -9,7 +9,7 @@ use crate::instructions::*;
 pub mod instructions;
 use instructions::Initialize;
 
-declare_id!("NKTKmCPzV3GUtBZLp7QPgaww5VE78rX3mmn4cnrHsgp");
+declare_id!("AE5qJgwZcDMjZ67a3TDqkujsfgHCZJ4fiA6vJJ1gisLh");
 
 #[program]
 pub mod dehype {
@@ -50,5 +50,8 @@ pub mod dehype {
     pub fn retrive(ctx: Context<Retrieve>, anwser_key: u64, amount: u64) -> Result<()> {
         instructions::retrive(ctx, anwser_key, amount)?;
         Ok(())
+    }
+    pub fn resolve_market(ctx: Context<ResolveMarket>, correct_answer_key: u64) -> Result<()> {
+        return ctx.accounts.handler(10, correct_answer_key, ctx.bumps);
     }
 }

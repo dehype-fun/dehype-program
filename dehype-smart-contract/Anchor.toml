@@ -21,3 +21,6 @@ test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/localnet_test.t
 startup_wait = 10000
 shutdown_wait = 2000
 upgradeable = false
+
+[env]
+ADMIN_PUBKEY = "J57virTzJJ8yTJo8tTEwVgFxvduMB4cC4z1dQo5oMTot"

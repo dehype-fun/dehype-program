@@ -26,6 +26,7 @@ pub struct CreateMarket<'info> {
         bump,
     )]
     pub market_account: Account<'info, MarketAccount>,
+    /// CHECK: This is not dangerous because we don't read or write from this account
     #[account(
         init,
         payer = creator,
@@ -34,6 +35,7 @@ pub struct CreateMarket<'info> {
         owner = system_program::System::id(),
         bump,
     )]
+    /// CHECK: This is not dangerous because we don't read or write from this account
     pub vault_account: AccountInfo<'info>,
     pub system_program: Program<'info, System>,
 }
@@ -77,6 +79,8 @@ pub fn create_market(
             answer_total_tokens: 0,
             outcome_token_name: outcome_token_names.as_ref().map_or(DEFAULT_OUTCOME_TOKEN_NAME.to_string(), |names| names[i].clone()),
             outcome_token_logo: outcome_token_logos.as_ref().map_or(DEFAULT_OUTCOME_TOKEN_LOGO.to_string(), |logos| logos[i].clone()),
+            outcome_token_symbol: "".to_string(),
+            outcome_token_url: "".to_string(),
         });
     }
 

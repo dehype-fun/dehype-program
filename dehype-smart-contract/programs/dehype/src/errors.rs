@@ -32,4 +32,8 @@ pub enum ProgramErrorCode {
     CreatorFeeTooHigh,
     #[msg("Invalid arguments")]
     InvalidArguments,
+    #[msg("Invalid answer")]
+    InvalidAnswer,
+    #[msg("Allocation must be greater than 0")]
+    AllocationMustBeGreaterThanZero,
 }

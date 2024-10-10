@@ -1,11 +1,10 @@
 use std::{borrow::BorrowMut, ops::DerefMut};
 
-use anchor_lang::prelude::*;
+use anchor_lang::{prelude::*, solana_program::{program::invoke, system_instruction}};
 use anchor_spl::{
     associated_token::AssociatedToken,
     token::{Mint, Token, TokenAccount},
 };
-use solana_program::{program::invoke, system_instruction};
 
 use crate::{errors::ProgramErrorCode, states::{answer::AnswerAccount, betting::{BettingAccount, BETTING_SEED}, market::{MarketAccount, MARKET_VAULT_SEED}, ConfigAccount}, utils::helper::{transfer_sol, transfer_token_or_point_to_pool}};
 
@@ -26,6 +25,7 @@ pub struct Bet<'info> {
       bump,
     )]
     pub bet_account: Account<'info, BettingAccount>,
+    /// CHECK: Not safe
     #[account(mut)]
     pub vault_account: AccountInfo<'info>,
     pub system_program: Program<'info, System>,

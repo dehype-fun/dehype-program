@@ -13,6 +13,11 @@ pub struct Answer {
     pub outcome_token_name: String,
     #[max_len(50)]
     pub outcome_token_logo: String,
+    #[max_len(50)]
+    pub outcome_token_symbol: String,
+    #[max_len(50)]
+    pub outcome_token_url: String,
+
 }
 
 
