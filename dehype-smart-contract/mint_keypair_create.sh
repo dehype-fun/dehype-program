@@ -1,0 +1,1 @@
+solana-keygen new --outfile ./mint-keypair.json --no-bip39-passphrase --force

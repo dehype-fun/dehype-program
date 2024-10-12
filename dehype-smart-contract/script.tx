@@ -1,1 +1,2 @@
  ADMIN_PUBKEY=J57virTzJJ8yTJo8tTEwVgFxvduMB4cC4z1dQo5oMTot anchor build
+ solana-keygen new --outfile $KEYPAIR_PATH --no-bip39-passphrase --force

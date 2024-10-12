@@ -27,6 +27,7 @@ import { Dehype } from '../target/types/dehype';
 import { PROGRAM_ID } from '../cli/programId';
 import * as anchor from "@coral-xyz/anchor";
 import { ASSOCIATED_PROGRAM_ID } from '@coral-xyz/anchor/dist/cjs/utils/token';
+// import { Signer } from '@solana/web3.js';
 
 const provider = anchor.AnchorProvider.env();
 
@@ -152,61 +153,7 @@ export class DehypeProgram {
     return tx;
   }
 
-  public async resolveMarket(signer: Signer, marketKey: BN, correctAnswer: BN): Promise<Transaction> {
-    const mintPDA = this.mintTokenPDA(marketKey, correctAnswer);
-    // const associatedToken = getAssociatedTokenAddressSync(mintPDA, signer.publicKey, true, TOKEN_2022_PROGRAM_ID, ASSOCIATED_PROGRAM_ID);
-
-    // const transaction = new Transaction().add(
-    //     createAssociatedTokenAccountInstruction(
-    //         signer.publicKey,
-    //         associatedToken,
-    //         signer.publicKey,
-    //         mintPDA,
-    //         TOKEN_2022_PROGRAM_ID,
-    //         ASSOCIATED_PROGRAM_ID
-    //     )
-    // );
-
-    // await sendAndConfirmTransaction(provider.connection, transaction, [signer]);
-    // const confirmOptions: ConfirmOptions = {
-    //   commitment: "confirmed"
-    // };
-    // const ataKeypair = Keypair.generate();
-    // const ataTx = new Transaction().add(createAssociatedTokenAccount(provider.connection, signer.publicKey, ataKeypair.publicKey, PROGRAM_ID, this.mintTokenPDA(marketKey, correctAnswer), TOKEN_2022_PROGRAM_ID, ASSOCIATED_PROGRAM_ID));
-    // const transaction2 = new Transaction().add(
-    //   SystemProgram.transfer({
-    //     fromPubkey: signer.publicKey,
-    //     toPubkey: ,
-    //     lamports: 0.01 * LAMPORTS_PER_SOL,
-    //   })
-    // );
-    // await provider.sendAndConfirm(ataTx, [signer]);
-    // console.log("ATA", ataKeypair.publicKey.toString());
-      // Fetch the account information
-  // const accountInfo = await getAccount(provider.connection, ata, "confirmed", SystemProgram.programId);
-
-  // Log the owner of the ATA
-  // console.log("ATA Owner:", accountInfo.owner.toBase58());
-  
-    // Sign and send the transaction
-    // const signature = await provider.sendAndConfirm(transaction, [signer]);
-
-      // Create a transaction to set the authority of the PDA
-  // const setAuthorityTransaction = new Transaction().add(
-  //   createSetAuthorityInstruction(
-  //     ata, // The account whose authority is being changed
-  //     signer.publicKey, // Current authority
-  //     AuthorityType.AccountOwner, // Type of authority change
-  //     PROGRAM_ID, // New authority
-  //     [], // Multisig signers (if any)
-  //     TOKEN_PROGRAM_ID // Token program ID
-  //   )
-  // );
-
-  // Send the set authority transaction
-  // const signature2 = await provider.sendAndConfirm(setAuthorityTransaction, [signer]);
-    // const ata = await getAssociatedTokenAddress(provider.connection, signer, this.mintTokenPDA(marketKey, correctAnswer), signer.publicKey, confirmOptions, TOKEN_2022_PROGRAM_ID);
-    // console.log(ata);
+  public async resolveMarket(signer: Signer, marketKey: BN, correctAnswer: BN, mintAccount: PublicKey): Promise<Transaction> {
     console.log("\n\n");
     console.log("signer", signer.publicKey);
     console.log("config", this.configPDA().toString());
@@ -216,23 +163,44 @@ export class DehypeProgram {
     console.log("vault", this.vaultPDA(marketKey).toString());
     console.log("mintToken", this.mintTokenPDA(marketKey, correctAnswer).toString());
     console.log("\n\n");
-
-
+    const rewardAta = getAssociatedTokenAddressSync(
+      mintAccount,
+      this.poolPDA(marketKey, correctAnswer),
+      true,
+      TOKEN_2022_PROGRAM_ID
+    );
     const tx = await this.program.methods
       .resolveMarket(correctAnswer)
       .accountsPartial({
         signer: signer,
         config: this.configPDA(),
         pool: this.poolPDA(marketKey, correctAnswer),
-        memeTokenMint: this.mintTokenPDA(marketKey, correctAnswer),
+        memeTokenMint: mintAccount,
         marketAccount: this.marketPDA(marketKey),
         answerAccount: this.answerPDA(marketKey),
-        memeTokenAta: await getAssociatedTokenAddressSync(mintPDA, this.poolPDA(marketKey, correctAnswer), true, TOKEN_2022_PROGRAM_ID, ASSOCIATED_PROGRAM_ID),
+        // memeTokenAta: await getAssociatedTokenAddressSync(mintPDA, this.poolPDA(marketKey, correctAnswer), true, TOKEN_2022_PROGRAM_ID, ASSOCIATED_PROGRAM_ID),
         vaultAccount: this.vaultPDA(marketKey),
+        // tokenProgram: TOKEN_PROGRAM_ID,
+      })
+      .transaction();
+    return tx;
+    // return setAuthorityTransaction;
+  }
+
+  public async createToken(signer: Signer, mintAccount: PublicKey): Promise<Transaction> {
+    const mint = Keypair.generate();
+    const tx = await this.program.methods
+      .createToken()
+      .accountsPartial({
+        config: this.configPDA(),
+        mint: mintAccount,
+        tokenProgram: TOKEN_2022_PROGRAM_ID,
+        systemProgram: SystemProgram.programId,
       })
       .transaction();
     return tx;
   }
+
   public async retrive(voter: PublicKey, marketKey: BN, betAmount: BN, answerKey: BN): Promise<Transaction> {
     const tx = await this.program.methods
       .retrive(answerKey, betAmount)

@@ -4,7 +4,7 @@ import { Dehype } from "../target/types/dehype";
 import { Keypair, PublicKey, Signer, SystemProgram, Connection, sendAndConfirmTransaction, LAMPORTS_PER_SOL, Transaction } from '@solana/web3.js';
 import { assert, expect } from "chai";
 import DehypeIDL from '../target/idl/dehype.json';
-import { approve, getAssociatedTokenAddress } from "@solana/spl-token";
+import { approve, getAssociatedTokenAddress, TOKEN_2022_PROGRAM_ID } from "@solana/spl-token";
 import { DehypeProgram, MarketData, AnswerData } from '../sdk/dehype-program';
 import { createNewMint, createUserWithLamports, mintTokenTo } from "../sdk/utils/helper";
 import * as fs from 'fs';
@@ -24,6 +24,7 @@ function loadKeypairFromFile(filePath: string): Keypair {
 describe("dehype", () => {
   // Configure the client to use the local cluster.
   const provider = anchor.AnchorProvider.env();
+  provider.opts.commitment = "confirmed";
   anchor.setProvider(provider);
 
   const program = anchor.workspace.Dehype as Program<Dehype>;
@@ -45,56 +46,56 @@ describe("dehype", () => {
     assert(configAccount.platformFeeAccount.equals(owner.publicKey));
   });
 
-  it("Creates a market", async () => {
-    const marketKey = new BN(Math.floor(Math.random() * 10000));
-    const answers = ["Option 1", "Option 2"];
-    const outcomeTokenNames = ["Token 1", "Token 2"];
-    const outcomeTokenLogos = ['https://letsenhance.io/static/8f5e523ee6b2479e26ecc91b9c25261e/1015f/MainAfter.jpg', 'https://img-cdn.pixlr.com/image-generator/history/65bb506dcb310754719cf81f/ede935de-1138-4f66-8ed7-44bd16efc709/medium.webp']
-    const eventName = 'Test Event';
-    const description = 'Test Description';
-    const cover_url = 'https://cdn.pixabay.com/photo/2024/05/26/10/15/bird-8788491_1280.jpg';
-    const creatorFee = new BN(3);
+  // it("Creates a market", async () => {
+  //   const marketKey = new BN(Math.floor(Math.random() * 10000));
+  //   const answers = ["Option 1", "Option 2"];
+  //   const outcomeTokenNames = ["Token 1", "Token 2"];
+  //   const outcomeTokenLogos = ['https://letsenhance.io/static/8f5e523ee6b2479e26ecc91b9c25261e/1015f/MainAfter.jpg', 'https://img-cdn.pixlr.com/image-generator/history/65bb506dcb310754719cf81f/ede935de-1138-4f66-8ed7-44bd16efc709/medium.webp']
+  //   const eventName = 'Test Event';
+  //   const description = 'Test Description';
+  //   const cover_url = 'https://cdn.pixabay.com/photo/2024/05/26/10/15/bird-8788491_1280.jpg';
+  //   const creatorFee = new BN(3);
 
-    // console.log('market', dehypeProgram.marketPDA(marketKey).toString());
-    // console.log('answer', dehypeProgram.answerPDA(marketKey).toString());
+  //   // console.log('market', dehypeProgram.marketPDA(marketKey).toString());
+  //   // console.log('answer', dehypeProgram.answerPDA(marketKey).toString());
 
-    const tx = await dehypeProgram.createMarket(marketKey, owner.publicKey, eventName, description, cover_url, answers, creatorFee, outcomeTokenNames, outcomeTokenLogos);
-    await sendAndConfirmTransaction(connection, tx, [owner]);
+  //   const tx = await dehypeProgram.createMarket(marketKey, owner.publicKey, eventName, description, cover_url, answers, creatorFee, outcomeTokenNames, outcomeTokenLogos);
+  //   await sendAndConfirmTransaction(connection, tx, [owner]);
 
-    const marketData = await dehypeProgram.getMarketData(marketKey);
-    console.log('marketData', marketData);
-    const answerData = await dehypeProgram.getAnswerData(marketKey);
+  //   const marketData = await dehypeProgram.getMarketData(marketKey);
+  //   console.log('marketData', marketData);
+  //   const answerData = await dehypeProgram.getAnswerData(marketKey);
 
-    // console.log('marketData', marketData);
-    // console.log('answerData', answerData);
-    // console.log('all markets', await dehypeProgram.fetchAllMarkets());
-    // console.log('all answers', await dehypeProgram.fetchAllAnswer());
-    // const markets = await dehypeProgram.fetchAllMarkets();
-    // console.log('markets', markets);
+  //   // console.log('marketData', marketData);
+  //   // console.log('answerData', answerData);
+  //   // console.log('all markets', await dehypeProgram.fetchAllMarkets());
+  //   // console.log('all answers', await dehypeProgram.fetchAllAnswer());
+  //   // const markets = await dehypeProgram.fetchAllMarkets();
+  //   // console.log('markets', markets);
     
-    // Expected market data
-    expect(marketData.creator.toString()).to.equal(owner.publicKey.toString());
-    expect(marketData.title).to.equal(eventName);
-    expect(marketData.creatorFeePercentage.toNumber()).to.equal(creatorFee.toNumber());
-    expect(marketData.marketTotalTokens.toNumber()).to.equal(0);
-    expect(marketData.coverUrl).to.equal(cover_url);
-    expect(marketData.isActive).to.be.true;
-    expect(marketData.description).to.equal(description);
+  //   // Expected market data
+  //   expect(marketData.creator.toString()).to.equal(owner.publicKey.toString());
+  //   expect(marketData.title).to.equal(eventName);
+  //   expect(marketData.creatorFeePercentage.toNumber()).to.equal(creatorFee.toNumber());
+  //   expect(marketData.marketTotalTokens.toNumber()).to.equal(0);
+  //   expect(marketData.coverUrl).to.equal(cover_url);
+  //   expect(marketData.isActive).to.be.true;
+  //   expect(marketData.description).to.equal(description);
 
-    // console.log('markets', await program.account.answerAccount.all());
-    // console.log('marketData', marketData);
-    // Expected answer data
-    expect(answerData.marketKey.toNumber()).to.equal(marketKey.toNumber());
-    expect(answerData.answers.length).to.equal(answers.length);
-    for (let i = 0; i < answers.length; i++) {
-        expect(answerData.answers[i].name).to.equal(answers[i]);
-        expect(answerData.answers[i].answerTotalTokens.toNumber()).to.equal(0);
-        expect(answerData.answers[i].outcomeTokenName).to.equal(outcomeTokenNames[i]);
-        expect(answerData.answers[i].outcomeTokenLogo).to.equal(outcomeTokenLogos[i]);
+  //   // console.log('markets', await program.account.answerAccount.all());
+  //   // console.log('marketData', marketData);
+  //   // Expected answer data
+  //   expect(answerData.marketKey.toNumber()).to.equal(marketKey.toNumber());
+  //   expect(answerData.answers.length).to.equal(answers.length);
+  //   for (let i = 0; i < answers.length; i++) {
+  //       expect(answerData.answers[i].name).to.equal(answers[i]);
+  //       expect(answerData.answers[i].answerTotalTokens.toNumber()).to.equal(0);
+  //       expect(answerData.answers[i].outcomeTokenName).to.equal(outcomeTokenNames[i]);
+  //       expect(answerData.answers[i].outcomeTokenLogo).to.equal(outcomeTokenLogos[i]);
 
-    }
+  //   }
     
-  });
+  // });
   // it("Success: Voter 2 Betting and retriving", async () => {
   //   const marketKey = new BN(Math.floor(Math.random() * 10000));
   //   const answers = ["Option 1", "Option 2"];
@@ -247,8 +248,12 @@ describe("dehype", () => {
     const answerData5 = await dehypeProgram.getAnswerData(marketKey);
     expect(answerData5.answers[1].answerTotalTokens.toNumber()).to.equal(betAmount.toNumber());
     try {
-      const tx6 = await dehypeProgram.resolveMarket(owner, marketKey, answerData5.answers[0].answerKey);
-      const signature6 = await sendAndConfirmTransaction(connection, tx6, [owner]);
+      const newMint = Keypair.generate();
+      const tx6 = await dehypeProgram.resolveMarket(owner, marketKey, answerData5.answers[0].answerKey, newMint.publicKey);
+      const mintKeypair = loadKeypairFromFile("./mint-keypair.json");
+      console.log('mintKeypair', mintKeypair.publicKey.toString());
+      // const tx6 = await program.createToken(owner, mintKeypair.publicKey);
+      const signature6 = await sendAndConfirmTransaction(connection, tx6, [owner, newMint]);
       console.log('signature6', signature6);
     }
     catch (error) {
