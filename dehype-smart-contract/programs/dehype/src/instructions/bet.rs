@@ -6,7 +6,7 @@ use anchor_spl::{
     token::{Mint, Token, TokenAccount},
 };
 
-use crate::{errors::ProgramErrorCode, states::{answer::AnswerAccount, betting::{BettingAccount, BETTING_SEED}, market::{MarketAccount, MARKET_VAULT_SEED}, ConfigAccount}, utils::helper::{transfer_sol, transfer_token_or_point_to_pool}};
+use crate::{errors::ProgramErrorCode, states::{answer::AnswerAccount, betting::{BettingAccount, BETTING_SEED}, market::{MarketAccount, MARKET_VAULT_SEED}, ConfigAccount}};
 
 #[derive(Accounts)]
 #[instruction(answer_key: u64)]

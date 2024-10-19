@@ -8,7 +8,8 @@ import {
   ConfirmOptions,
   LAMPORTS_PER_SOL,
   Keypair,
-  sendAndConfirmTransaction
+  sendAndConfirmTransaction,
+  AccountInfo
 } from '@solana/web3.js';
 import {
   AuthorityType,
@@ -26,7 +27,10 @@ import {
 import { Dehype } from '../target/types/dehype';
 import { PROGRAM_ID } from '../cli/programId';
 import * as anchor from "@coral-xyz/anchor";
+import { findMetadataPda } from "@metaplex-foundation/js";
 import { ASSOCIATED_PROGRAM_ID } from '@coral-xyz/anchor/dist/cjs/utils/token';
+import { bs58 } from '@coral-xyz/anchor/dist/cjs/utils/bytes';
+import { publicKey } from '@coral-xyz/anchor/dist/cjs/utils';
 // import { Signer } from '@solana/web3.js';
 
 const provider = anchor.AnchorProvider.env();
@@ -42,7 +46,7 @@ export class DehypeProgram {
     ) { }
   
     get program() {
-      return new Program(this.idl, provider);
+      return new Program(this.idl, PROGRAM_ID, provider);
     }
   
     get accounts(): any {
@@ -108,7 +112,7 @@ export class DehypeProgram {
     public async initialize(owner: PublicKey): Promise<Transaction> {
       const tx = await this.program.methods
         .initialize()
-        .accountsPartial({
+        .accounts({
           owner: owner,
           configAccount: this.configPDA(),
           systemProgram: SystemProgram.programId,
@@ -120,7 +124,7 @@ export class DehypeProgram {
     public async createMarket(marketKey: BN, creator: PublicKey, eventName: string, description: string, cover_url: string, answers: string[], creatorFee: BN, outcomeTokenNames?: string[], outcomeTokenLogos?: string[]): Promise<Transaction> {
       const tx = await this.program.methods
         .createMarket(marketKey, eventName, description, cover_url, answers, outcomeTokenNames || null, outcomeTokenLogos || null, creatorFee)
-        .accountsPartial({
+        .accounts({
           creator: creator,
           answerAccount: this.answerPDA(marketKey),
           marketAccount: this.marketPDA(marketKey),
@@ -141,7 +145,7 @@ export class DehypeProgram {
   public async bet(voter: PublicKey, marketKey: BN, betAmount: BN, answerKey: BN): Promise<Transaction> {
     const tx = await this.program.methods
       .bet(answerKey, betAmount)
-      .accountsPartial({
+      .accounts({
         voter: voter,
         marketAccount: this.marketPDA(marketKey),
         vaultAccount: this.vaultPDA(marketKey),
@@ -152,59 +156,74 @@ export class DehypeProgram {
       .transaction();
     return tx;
   }
+  // public async resolveMarket(signer: Signer, marketKey: BN, correctAnswer: BN, mintAccount: PublicKey): Promise<Transaction> {
+  //   console.log("\n\n");
+  //   console.log("signer", signer.publicKey);
+  //   console.log("config", this.configPDA().toString());
+  //   console.log("memetoken", this.mintTokenPDA(marketKey, correctAnswer).toString());
+  //   console.log("market", this.marketPDA(marketKey).toString());
+  //   console.log("answer", this.answerPDA(marketKey).toString());
+  //   console.log("vault", this.vaultPDA(marketKey).toString());
+  //   console.log("mintToken", this.mintTokenPDA(marketKey, correctAnswer).toString());
+  //   console.log("\n\n");
+  //   const rewardAta = getAssociatedTokenAddressSync(
+  //     mintAccount,
+  //     this.poolPDA(marketKey, correctAnswer),
+  //     true,
+  //     TOKEN_2022_PROGRAM_ID
+  //   );
+  //   const tokenAccount = getAssociatedTokenAddressSync(
+  //     mintAccount,
+  //     provider.wallet.publicKey
+  //   )
+  //   const TOKEN_METADATA_PROGRAM_ID = new anchor.web3.PublicKey(
+  //     "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
+  //   )
+  //   console.log("tokenAccount", tokenAccount.toString());
 
-  public async resolveMarket(signer: Signer, marketKey: BN, correctAnswer: BN, mintAccount: PublicKey): Promise<Transaction> {
-    console.log("\n\n");
-    console.log("signer", signer.publicKey);
-    console.log("config", this.configPDA().toString());
-    console.log("memetoken", this.mintTokenPDA(marketKey, correctAnswer).toString());
-    console.log("market", this.marketPDA(marketKey).toString());
-    console.log("answer", this.answerPDA(marketKey).toString());
-    console.log("vault", this.vaultPDA(marketKey).toString());
-    console.log("mintToken", this.mintTokenPDA(marketKey, correctAnswer).toString());
-    console.log("\n\n");
-    const rewardAta = getAssociatedTokenAddressSync(
-      mintAccount,
-      this.poolPDA(marketKey, correctAnswer),
-      true,
-      TOKEN_2022_PROGRAM_ID
-    );
-    const tx = await this.program.methods
-      .resolveMarket(correctAnswer)
-      .accountsPartial({
-        signer: signer,
-        config: this.configPDA(),
-        pool: this.poolPDA(marketKey, correctAnswer),
-        memeTokenMint: mintAccount,
-        marketAccount: this.marketPDA(marketKey),
-        answerAccount: this.answerPDA(marketKey),
-        // memeTokenAta: await getAssociatedTokenAddressSync(mintPDA, this.poolPDA(marketKey, correctAnswer), true, TOKEN_2022_PROGRAM_ID, ASSOCIATED_PROGRAM_ID),
-        vaultAccount: this.vaultPDA(marketKey),
-        // tokenProgram: TOKEN_PROGRAM_ID,
-      })
-      .transaction();
-    return tx;
-    // return setAuthorityTransaction;
-  }
+  //   // console.log("market", await this.getMarketData(marketKey));
+  //   // const metadataPDA = await findMetadataPda(mintPDA)
+  //   console.log("metadata", await findMetadataPda(mintAccount));
+  //   console.log("memeTokenAta", await getAssociatedTokenAddressSync(this.mintTokenPDA(marketKey, correctAnswer), this.poolPDA(marketKey, correctAnswer), true, TOKEN_2022_PROGRAM_ID, ASSOCIATED_PROGRAM_ID));
+  //   const tx = await this.program.methods
+  //     .resolveMarket(correctAnswer)
+  //     .accounts({
+  //       signer: signer,
+  //       config: this.configPDA(),
+  //       pool: this.poolPDA(marketKey, correctAnswer),
+  //       memeTokenMint: this.mintTokenPDA(marketKey, correctAnswer),
+  //       marketAccount: this.marketPDA(marketKey),
+  //       answerAccount: this.answerPDA(marketKey),
+  //       // memeTokenAta: await getAssociatedTokenAddressSync(this.mintTokenPDA(marketKey, correctAnswer), this.poolPDA(marketKey, correctAnswer), true, TOKEN_2022_PROGRAM_ID, ASSOCIATED_PROGRAM_ID),
+  //       vaultAccount: this.vaultPDA(marketKey),
+  //       metadata: await findMetadataPda(mintAccount),
+  //       // memeTokenAta: tokenAccount,
+  //       tokenMetadataProgram: TOKEN_METADATA_PROGRAM_ID
+  //       // tokenProgram: TOKEN_PROGRAM_ID,
+  //     })
+  //     .transaction();
+  //   return tx;
+  //   // return setAuthorityTransaction;
+  // }
 
-  public async createToken(signer: Signer, mintAccount: PublicKey): Promise<Transaction> {
-    const mint = Keypair.generate();
-    const tx = await this.program.methods
-      .createToken()
-      .accountsPartial({
-        config: this.configPDA(),
-        mint: mintAccount,
-        tokenProgram: TOKEN_2022_PROGRAM_ID,
-        systemProgram: SystemProgram.programId,
-      })
-      .transaction();
-    return tx;
-  }
+  // public async createToken(signer: Signer, mintAccount: PublicKey): Promise<Transaction> {
+  //   const mint = Keypair.generate();
+  //   const tx = await this.program.methods
+  //     .createToken()
+  //     .accountsPartial({
+  //       config: this.configPDA(),
+  //       mint: mintAccount,
+  //       tokenProgram: TOKEN_2022_PROGRAM_ID,
+  //       systemProgram: SystemProgram.programId,
+  //     })
+  //     .transaction();
+  //   return tx;
+  // }
 
   public async retrive(voter: PublicKey, marketKey: BN, betAmount: BN, answerKey: BN): Promise<Transaction> {
     const tx = await this.program.methods
       .retrive(answerKey, betAmount)
-      .accountsPartial({
+      .accounts({
         voter: voter,
         marketAccount: this.marketPDA(marketKey),
         answerAccount: this.answerPDA(marketKey),
@@ -216,6 +235,34 @@ export class DehypeProgram {
     return tx;
   }
 
+  public async fetchAllByMarketKey(marketKey: BN): Promise<Array<BettingData>> {
+    console.log("marketKey", marketKey);
+    // const ntobs58 = x => ;
+    // console.log("ntobs58", ntobs58(marketKey));
+    let keypair = Keypair.generate();
+    // keypair.publicKey.
+    let filters: Array<{ memcmp: { offset: number; bytes: string } }> = [
+      {
+        memcmp: {
+          offset: 8,
+          bytes: bs58.encode(Buffer.from([2027])),
+        },
+      },
+    ];
+    
+    console.log("filters", filters);
+    const readonlyAccounts = await this.program.account.bettingAccount.all(
+      filters
+      // { offset: 0, length: 0 }
+     );
+
+     console.log("readonlyAccounts", readonlyAccounts);
+    //  console.log("allBetting", await this.accounts.bettingAccount.all());
+     return null;
+    //  const accounts: Array<BettingData> = Array.from(readonlyAccounts);
+    //  return accounts.map((account) => this.accounts.bettingAccount.decode(account.account.data));
+
+  }
   public async getConfigData(): Promise<ConfigData> {
       const configPDA = this.configPDA();
       const configData = await this.accounts.configAccount.fetch(configPDA);

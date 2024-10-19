@@ -8,10 +8,10 @@ pub const MARKET_VAULT_SEED: &[u8] = b"market_vault";
 #[account]
 #[derive(InitSpace)]
 pub struct MarketAccount {
+    pub market_key: u64,
     pub bump: u8,
     pub bump_vault: u8,
     pub creator: Pubkey,
-    pub market_key: u64,
     #[max_len(30)]
     pub title: String,
     pub creator_fee_percentage: u64,

@@ -1,7 +1,6 @@
 use std::ops::DerefMut;
 
 use anchor_lang::{prelude::*, system_program};
-
 use crate::{consts::{DEFAULT_OUTCOME_TOKEN_LOGO, DEFAULT_OUTCOME_TOKEN_NAME}, errors::ProgramErrorCode, states::{ answer::{Answer, AnswerAccount, ANSWER_SEED}, market::{ MarketAccount, MARKET_SEED, MARKET_VAULT_SEED } }}
 ;
 
