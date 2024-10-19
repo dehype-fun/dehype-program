@@ -563,26 +563,26 @@ const createMarket = async (
     })
   );
 
-  // marketInstructions.push(
-  //   DexInstructions.initializeMarket({
-  //     market: marketAccounts.market.publicKey,
-  //     requestQueue: marketAccounts.requestQueue.publicKey,
-  //     eventQueue: marketAccounts.eventQueue.publicKey,
-  //     bids: marketAccounts.bids.publicKey,
-  //     asks: marketAccounts.asks.publicKey,
-  //     baseVault: marketAccounts.baseVault.publicKey,
-  //     quoteVault: marketAccounts.quoteVault.publicKey,
-  //     baseMint,
-  //     quoteMint,
-  //     baseLotSize: new BN(baseLotSize),
-  //     quoteLotSize: new BN(quoteLotSize),
-  //     feeRateBps: 150, // Unused in v3
-  //     quoteDustThreshold: new BN(500), // Unused in v3
-  //     vaultSignerNonce: vaultOwnerNonce,
-  //     programId: MAINNET_PROGRAM_ID.OPENBOOK_MARKET,
-  //   })
+  marketInstructions.push(
+    DexInstructions.initializeMarket({
+      market: marketAccounts.market.publicKey,
+      requestQueue: marketAccounts.requestQueue.publicKey,
+      eventQueue: marketAccounts.eventQueue.publicKey,
+      bids: marketAccounts.bids.publicKey,
+      asks: marketAccounts.asks.publicKey,
+      baseVault: marketAccounts.baseVault.publicKey,
+      quoteVault: marketAccounts.quoteVault.publicKey,
+      baseMint,
+      quoteMint,
+      baseLotSize: new BN(baseLotSize),
+      quoteLotSize: new BN(quoteLotSize),
+      feeRateBps: 150, // Unused in v3
+      quoteDustThreshold: new BN(500), // Unused in v3
+      vaultSignerNonce: vaultOwnerNonce,
+      programId: MAINNET_PROGRAM_ID.OPENBOOK_MARKET,
+    })
 
-  // );
+  );
 
   try {
     let blockhash = (await connection.getLatestBlockhash("finalized"))
@@ -624,33 +624,33 @@ const createMarket = async (
     TOKEN_PROGRAM_ID,
     ASSOCIATED_TOKEN_PROGRAM_ID,
   );
-const tx = await program.methods
-  .inititializeSerumMarket(bump, new BN(baseLotSize), new BN(quoteLotSize), new BN(0), new BN(500))
-  .accounts({
-    market: marketAccounts.market.publicKey ,
-    coinVault: coinVault,
-    pcVault: pcVault,
-    coinMint: baseMintPda,
-    pcMint: SOL_TOKEN_ADDR,
-    authority: owner.publicKey,
-    systemProgram: SystemProgram.programId,
-    dexProgram: MAINNET_PROGRAM_ID.OPENBOOK_MARKET,
-    bids: marketAccounts.bids.publicKey,
-    asks: marketAccounts.asks.publicKey,
-    eventQ: marketAccounts.eventQueue.publicKey,
-    reqQ: marketAccounts.requestQueue.publicKey,
-    tokenProgram: TOKEN_PROGRAM_ID,
-    associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-    rent: SYSVAR_RENT_PUBKEY,
-    marketSigner: marketAccounts.market.publicKey,
-    reqQSigner: marketAccounts.requestQueue.publicKey,
-    eventQSigner: marketAccounts.eventQueue.publicKey,
-    bidsSigner: marketAccounts.bids.publicKey,
-    asksSigner: marketAccounts.asks.publicKey,
-  })
-  .signers([owner, marketAccounts.market, marketAccounts.requestQueue, marketAccounts.eventQueue, marketAccounts.bids, marketAccounts.asks])
-  .rpc();
-  console.log("tx: ", tx);
+// const tx = await program.methods
+//   .inititializeSerumMarket(bump, new BN(baseLotSize), new BN(quoteLotSize), new BN(0), new BN(500))
+//   .accounts({
+//     market: marketAccounts.market.publicKey ,
+//     coinVault: coinVault,
+//     pcVault: pcVault,
+//     coinMint: baseMintPda,
+//     pcMint: SOL_TOKEN_ADDR,
+//     authority: owner.publicKey,
+//     systemProgram: SystemProgram.programId,
+//     dexProgram: MAINNET_PROGRAM_ID.OPENBOOK_MARKET,
+//     bids: marketAccounts.bids.publicKey,
+//     asks: marketAccounts.asks.publicKey,
+//     eventQ: marketAccounts.eventQueue.publicKey,
+//     reqQ: marketAccounts.requestQueue.publicKey,
+//     tokenProgram: TOKEN_PROGRAM_ID,
+//     associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+//     rent: SYSVAR_RENT_PUBKEY,
+//     marketSigner: marketAccounts.market.publicKey,
+//     reqQSigner: marketAccounts.requestQueue.publicKey,
+//     eventQSigner: marketAccounts.eventQueue.publicKey,
+//     bidsSigner: marketAccounts.bids.publicKey,
+//     asksSigner: marketAccounts.asks.publicKey,
+//   })
+//   .signers([owner, marketAccounts.market, marketAccounts.requestQueue, marketAccounts.eventQueue, marketAccounts.bids, marketAccounts.asks])
+//   .rpc();
+//   console.log("tx: ", tx);
 
 
     // let success = await sendBundle([
